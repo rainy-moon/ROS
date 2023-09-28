@@ -77,8 +77,10 @@ struct io_buffer{
 };
 struct MOUSE{
 	char mouse_state[3];
-	int x,y,ms_state,btn;
-	int posx,posy;
+	int hwnd;//窗口id
+	int x,y;//鼠标移动数据
+	int ms_state,btn; 
+	int posx,posy; //鼠标位置
 }mouse;
 struct SHEET{
 	int z,width,height;
@@ -100,7 +102,9 @@ unsigned char ms_buffer[128];
 unsigned char s[20];
 unsigned char* screen = 0xa0000;
 struct SHEET* ** screen_buf;
+
 //sysfunc.asm 汇编定义函数，寄存器级操作
+
 void hlt();
 void sti();
 void cli();
@@ -116,7 +120,9 @@ void asm_inthandler21h();
 void asm_inthandler27h();
 void asm_inthandler2ch();
 void stihlt();
+
 //graphAfont.c 图像画面操作函数
+
 void init_color_plate();
 unsigned char* g_boxfill(int width, int height, unsigned char color);
 unsigned char* g_edgefill(int board, int width,int height,unsigned char color);
@@ -132,7 +138,10 @@ void init_screen_buf();
 void sheet_refresh(int index,int x0,int y0,int width,int height);
 int pix_in_sheet(int x,int y,int z);
 void sheet_slide(int x,int y,int index);
+
 //窗口package windows.c
+
+int mouse_create();
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color);
 void win_shows(int hwnd, char* s, unsigned char font_color);
 

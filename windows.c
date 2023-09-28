@@ -1,19 +1,41 @@
 #include"ros.h"
 
+int mouse_create(){
+	for(int i=0;i<MAX_WINDOWS;i++){
+		if(windows[i].statu) continue;
+		windows[i].x0 = 160;
+		windows[i].y0 = 100;
+		windows[i].width= 8;
+		windows[i].height=8;
+		unsigned char* buffer = g_boxfill(8,8, 255);
+		windows[i].hwnd = i;
+		windows[i].sheet_index = sheet_malloc(160,100,8,8,sc->top,buffer);
+		windows[i].statu = 1;
+		g_showc(1,0,0,COLOR_LIGHT_PURPLE,sc->top);
+		windows[i].cursor_x = 0;
+		windows[i].cursor_y = 0;
+		mouse.hwnd = i;
+		return i;
+	}
+	return -1;
+}
+
 /*默认窗口
 *desktop窗口为0号窗口
 *debug窗口为1号窗口
 */
+
 /**
- * @brief 
+ * @brief 创建窗口，关联一个图层
  * 
  * @param name 
  * @param x0 
  * @param y0 
  * @param width 
  * @param height 
+ * @param z 创建时窗口z层数
  * @param bg_color 
- * @return int 出错返回-1 正常返回窗口下标
+ * @return int 正常返回窗口id，错误（无法建更多窗口）-1
  */
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color){
 	for(int i=0;i<MAX_WINDOWS;i++){

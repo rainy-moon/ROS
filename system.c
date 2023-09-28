@@ -137,7 +137,7 @@ void get_keyboard_input(){
 		int data = io_buffer_pop(&kb_buffer_ctrl);
 		if(data!=-1){
 			my_sprintf(s,"kb_num : %d",data);
-			win_shows(1,s,10,7);
+			win_shows(1,s,7);
 		}
 	}
 	return;
@@ -154,12 +154,11 @@ void mouse_decode(){
 	mouse.y = -mouse.y;
 	//打印字符和更新鼠标，可能以后要转移到图层控制模块
 	
-	g_showc(1,mouse.posx,mouse.posy,COLOR_LIGHT_SKYBLUE);
 	mouse.posx=(mouse.posx+mouse.x)%320;
 	mouse.posy=(mouse.posy+mouse.y)%200;
 	if(mouse.posx<0) mouse.posx=0;
 	if(mouse.posy<0) mouse.posy=0;
-	g_showc(1,mouse.posx,mouse.posy,COLOR_LIGHT_PURPLE);
+	sheet_slide(mouse.posx,mouse.posy,windows[mouse.hwnd].sheet_index);
 }
 
 int get_mouse_input(int ms_state){

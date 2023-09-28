@@ -15,8 +15,6 @@ mov es,ax
 mov ss,ax
 mov sp,7c00h
 call boot
-mov cx,0ffffh
-loop $
 call load_system
 jmp 9000h
 
@@ -40,7 +38,7 @@ load_system:
 	int 10h
 	mov si,0 ;记录尝试读取次数
 	try1:
-		;先读柱面0 磁头0 2-18扇区 8.5K
+		;先读柱面0 磁头0 2-18扇区 8.5K 101000 - 103200
 		mov ax,LOAD_BASE_DIRECTION1
 		mov es,ax
 		mov ah,02h

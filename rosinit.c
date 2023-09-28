@@ -22,41 +22,33 @@ void MAIN(){
 	//开中断
 	io_out8(PIC0_IMR, 0xf9); 
 	io_out8(PIC1_IMR, 0xef);
-	
-	//初始化调色板
-	init_color_plate();
-	//初始化屏幕
-	win_create("ROS_desktop",0,0,320,200,6);
-	//调试窗口
-	win_create("debug",180,20,300,180,0);
 	//初始化io缓冲区
 	init_io_buffer(&kb_buffer_ctrl,64,kb_buffer);
 	init_io_buffer(&ms_buffer_ctrl,128,ms_buffer);
 	//初始化页表
 	init_page_ctrl();
-	//内存分配测试(临时部分)
-
-	int testptr1 =(int) mem_malloc(200*sizeof(int));
-	my_sprintf(s,"p0-7 %d %d",*((char*)0x400000),testptr1);
-	win_shows(1,s,10,7);
-	int testptr2 = (int)mem_malloc(400*sizeof(int));
-	my_sprintf(s,"p0-7 %d %d",*((char*)0x400000),testptr2);
-	win_shows(1,s,10,7);
-	mem_free((void*)testptr1,200*sizeof(int));
-	my_sprintf(s,"p0-7 %d",*((char*)0x400000));
-	win_shows(1,s,10,7);
-	mem_free((void*)testptr2,400*sizeof(int));
-	my_sprintf(s,"p0-7 %d",*((char*)0x400000));
-	win_shows(1,s,10,7);
+	//初始化调色板
+	init_color_plate();
+	//初始化图层
+	init_sheet_ctrl();
+	//初始化屏幕图层记录map
+	init_screen_buf();
+	//桌面图层
+	win_create("ROS_desktop",0,0,320,200,sc->top,6);
+	//调试窗口
+	win_create("debug",180,20,300,180,sc->top,0);
+	
 	//初始化鼠标
 	cli();
 	init_keyboard();
 	enable_mouse();
 	sti();
-	g_showc(1,24,24,COLOR_LIGHT_PURPLE);
+	//显示鼠标
+	mouse_create();
+	
 	mouse.x=0;mouse.y=0;
 	mouse.ms_state=0;
-	mouse.posx = 16;mouse.posy=16;
+	mouse.posx = 160;mouse.posy=100;
 	while(1) {
 		cli();
 		get_keyboard_input();

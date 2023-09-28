@@ -245,7 +245,7 @@ int sheet_malloc(int x,int y,int width,int height,int z,unsigned char* buffer){
 			sc->sheets[i].width=width;
 			sc->sheets[i].height=height;
 			sc->sheets[i].buf=buffer;
-			void sheet_display(i,z);
+			sheet_display(i,z);
 			return i;
 		}
 	}
@@ -259,7 +259,7 @@ void sheet_free(int index){
 	return;
 }
 void init_screen_buf(){
-	screen_buf = (unsigned int**)mem_malloc(sizeof(unsigned int[200][320]));
+	screen_buf = (struct SHEET ***)mem_malloc(sizeof(unsigned int[200][320]));
 	return;
 }
 /**
