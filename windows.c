@@ -9,9 +9,11 @@ int mouse_create(){
 		windows[i].height=8;
 		unsigned char* buffer = g_boxfill(8,8, 255);
 		windows[i].hwnd = i;
-		windows[i].sheet_index = sheet_malloc(160,100,8,8,sc->top,buffer);
+		windows[i].sheet_index = sheet_malloc(160,100,8,8,sc->top+1,buffer);
+		if(windows[i].sheet_index<0) break;
 		windows[i].statu = 1;
 		g_showc(1,0,0,COLOR_LIGHT_PURPLE,sc->top);
+		sheet_refresh(windows[i].sheet_index,0,0,8,8);
 		windows[i].cursor_x = 0;
 		windows[i].cursor_y = 0;
 		mouse.hwnd = i;

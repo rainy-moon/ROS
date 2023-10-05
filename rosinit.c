@@ -33,18 +33,19 @@ void MAIN(){
 	init_sheet_ctrl();
 	//初始化屏幕图层记录map
 	init_screen_buf();
+	//显示鼠标
+	mouse_create();
 	//桌面图层
 	win_create("ROS_desktop",0,0,320,200,sc->top,6);
 	//调试窗口
-	win_create("debug",180,20,300,180,sc->top,0);
+	win_create("debug",180,20,120,160,sc->top,0);
 	
 	//初始化鼠标
 	cli();
 	init_keyboard();
 	enable_mouse();
 	sti();
-	//显示鼠标
-	mouse_create();
+	
 	
 	mouse.x=0;mouse.y=0;
 	mouse.ms_state=0;

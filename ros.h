@@ -89,7 +89,7 @@ struct SHEET{
 	unsigned char* buf;
 };
 struct sheet_ctrl{
-	int top,maxx,maxy;
+	int maxx,maxy,top,resv;//resv保留位
 	struct SHEET *sheet_zlevel[MAX_SHEETS];
 	struct SHEET sheets[MAX_SHEETS];
 };
@@ -101,7 +101,7 @@ unsigned char kb_buffer[64];
 unsigned char ms_buffer[128];
 unsigned char s[20];
 unsigned char* screen = 0xa0000;
-struct SHEET* ** screen_buf;
+struct SHEET* *screen_buf;
 
 //sysfunc.asm 汇编定义函数，寄存器级操作
 

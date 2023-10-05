@@ -142,11 +142,11 @@ void sheet_updatez(int index,int z){
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
-				if(screen_buf[i][j]!=&(sc->sheets[index])) continue;
+				if(screen_buf[i*320+j]!=&(sc->sheets[index])) continue;
 				else{
 					for(int k = old;k>=z;k--)
 						if(pix_in_sheet(j,i,k)){
-							screen_buf[i][j] = sc->sheet_zlevel[k];
+							screen_buf[i*320+j] = sc->sheet_zlevel[k];
 							if(sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)]!=COLOR_TRANSP)screen[i*320+j] = sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)];
 							break;
 						}
@@ -166,9 +166,9 @@ void sheet_updatez(int index,int z){
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
-				if(screen_buf[i][j]==&(sc->sheets[index])) continue;
-				else if(screen_buf[i][j]->z<z) {
-					screen_buf[i][j] = sc->sheet_zlevel[z];
+				if(screen_buf[i*320+j]==&(sc->sheets[index])) continue;
+				else if(screen_buf[i*320+j]->z<z) {
+					screen_buf[i*320+j] = sc->sheet_zlevel[z];
 					if(sc->sheet_zlevel[z]->buf[(i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x)]!=COLOR_TRANSP)screen[i*320+j] = sc->sheet_zlevel[z]->buf[(i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x)];
 				}
 			}
@@ -189,14 +189,18 @@ void sheet_hide(int index){
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
-				if(screen_buf[i][j]!=&(sc->sheets[index])) continue;
+				if(screen_buf[i*320+j]!=&(sc->sheets[index])) continue;
 				else{
 					for(int k = sc->sheets[index].z-1;k>=0;k--)
-						if(pix_in_sheet(j,i,k)){
-							screen_buf[i][j] = sc->sheet_zlevel[k];
-							if(sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)]!=COLOR_TRANSP)screen[i*320+j] = sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)];
+						if(pix_in_sheet(j,i,k) && sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)]!=COLOR_TRANSP){
+							screen_buf[i*320+j] = sc->sheet_zlevel[k];
+							screen[i*320+j] = sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)];
 							break;
 						}
+					if(screen_buf[i*320+j]==&(sc->sheets[index])){
+						screen_buf[i*320+j] = (struct SHEET*) NULL;
+						screen[i*320+j] = COLOR_BLACK;
+					}
 				}
 			}
 		sc->sheets[index].z = -1;
@@ -206,20 +210,27 @@ void sheet_hide(int index){
 void sheet_display(int index,int z){
 	if(sc->sheets[index].z>=0);
 	else{
+		//将上方的图层整体上移一层
 		for(int i=sc->top+1;i>z;i--){
 			sc->sheet_zlevel[i]=sc->sheet_zlevel[i-1];
-			sc->sheet_zlevel[i]->z--;
+			sc->sheet_zlevel[i]->z++;
 		}
+		//空出的第z层放入新图层
 		sc->sheet_zlevel[z] = &(sc->sheets[index]);
-		sc->top ++;
 		sc->sheets[index].z = z;
-		int x1 =  sc->sheets[index].x+sc->sheets[index].width;
+		//总图层加1
+		sc->top ++;
+		int x1 = sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
+		//遍历新加图层范围重新渲染
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
-				if(screen_buf[i][j]->z<z) {
-					screen_buf[i][j] = sc->sheet_zlevel[z];
-					if(sc->sheet_zlevel[z]->buf[(i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x)]!=COLOR_TRANSP)screen[i*320+j] = sc->sheet_zlevel[z]->buf[(i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x)];
+				int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
+				//如果没有该像素处没有图层或者图层层数<新加图层 & 不是透明色255
+				if((sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP ) && (!screen_buf[i*320+j]||screen_buf[i*320+j]->z<z)) {
+					//记录为当前图层，渲染颜色
+					screen_buf[i*320+j] = sc->sheet_zlevel[z];
+					screen[i*320+j] = sc->sheet_zlevel[z]->buf[point];
 				}
 			}
 	}
@@ -228,8 +239,8 @@ void sheet_display(int index,int z){
 /**
  * @brief 注册一个图层，返回其所在的sheets数组下标，-1失败
  * 
- * @param x 
- * @param y 
+ * @param x 绝对坐标
+ * @param y 绝对坐标
  * @param width 
  * @param height 
  * @param z 
@@ -259,25 +270,36 @@ void sheet_free(int index){
 	return;
 }
 void init_screen_buf(){
-	screen_buf = (struct SHEET ***)mem_malloc(sizeof(unsigned int[200][320]));
+	screen_buf = (struct SHEET **)mem_malloc(sizeof(unsigned int[200][320]));
 	return;
 }
 /**
  * @brief 更新图层（针对内容更新和移动）
  * 
- * @param index 
- * @param x0 相对坐标
- * @param y0 相对坐标
- * @param width 
- * @param height 
+ * @param index 图层编号
+ * @param x0 相对图层左上角坐标
+ * @param y0 相对图层左上角坐标
+ * @param width 需要更新的宽度
+ * @param height 需要更新的高度
  */
 void sheet_refresh(int index,int x0,int y0,int width,int height){
 	int x1 = x0+width;
 	int y1 = y0+height;
+	//遍历需要更新部分
 	for(int i = y0;i<y1;i++)
 		for(int j=x0;j<x1;j++){
-			if(screen_buf[i][j] == &(sc->sheets[index])) 
-				if(sc->sheets[index].buf[i*sc->sheets[index].width+j] != COLOR_TRANSP) screen[(i+sc->sheets[index].y)*320+j+sc->sheets[index].x] = sc->sheets[index].buf[i*sc->sheets[index].width+j];
+			int point = (i+sc->sheets[index].y)*320+j+sc->sheets[index].x;
+			//如果该像素不是透明色255 且显示为当前图层或没有图层 ，记录为当前图层，渲染颜色
+
+			if(sc->sheets[index].buf[i*sc->sheets[index].width+j] != COLOR_TRANSP){
+				if(!screen_buf[point]) {
+					screen_buf[point] = &(sc->sheets[index]);
+					goto lable1;
+				}
+				
+				if(screen_buf[point] == &(sc->sheets[index]))
+lable1:				screen[point] = sc->sheets[index].buf[i*sc->sheets[index].width+j];
+			}
 		}
 }
 /**

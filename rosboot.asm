@@ -71,7 +71,7 @@ load_system:
 		mov bx,0
 		mov ch,0
 		mov cl,LOAD_SECTION2
-		mov dx,10h
+		mov dx,0100h
 		int 13h
 		test ah,0
 		je finish2
