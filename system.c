@@ -169,7 +169,7 @@ int get_mouse_input(int ms_state){
 				if(data!=-1){
 					ms_state = 1;
 				}
-				else break;;
+				else break;
 			}
 			else break;
 		case 1:

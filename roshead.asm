@@ -4,8 +4,8 @@ CYLS 	EQU 0x0ff0	;?
 LEDS 	EQU 0X0FF1	;获得键盘led状态
 VMODE	EQU 0X0FF2	;颜色数目信息(颜色位数)
 SCRNX 	EQU 0X0FF4	;x分辨率地址
-SCRNY	EQU 0X0FF6	;y分辨率地址
-VRAM	EQU 0X0FF8	;图像缓冲区开始地址
+SCRNY	EQU 0X0FF8	;y分辨率地址
+VRAM	EQU 0X0FFc	;图像缓冲区开始地址
 FL_BOOT	EQU 0x00100000;主引导模块转移地址 512B
 FL_W2D  EQU 0x00100200;32位转化程序 512B
 FL_ROSINIT EQU 0x00101000;system init,screen init .etc 1M
@@ -18,8 +18,8 @@ mov al,0x13
 mov ah,0
 int 10h
 mov byte [VMODE],8
-mov word [SCRNX],320
-mov word [SCRNY],200
+mov dword [SCRNX],320
+mov dword [SCRNY],200
 mov dword [VRAM],0xa0000
 
 mov ah,2

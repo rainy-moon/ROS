@@ -105,7 +105,10 @@ void g_shows(const char* string, int x0, int y0, char color,int index){
 	sheet_refresh(index,x0,y0,x-x0,8);
 	return;
 }
-
+/**
+ * @brief 初始化图层控制器
+ * 
+ */
 void init_sheet_ctrl(){
 	sc = (struct sheet_ctrl*)mem_malloc(sizeof(struct sheet_ctrl));
 	sc->maxx = 320;sc->maxy=200;
@@ -129,74 +132,95 @@ void init_sheet_ctrl(){
  */
 void sheet_updatez(int index,int z){
 	int old = sc->sheets[index].z;
+	//如果原层数和新层数相同不作操作
 	if(old == z) return; 
-	else if(old>z){//下调
+	else if(old>z){
+		//下调
 		struct SHEET* temp = sc->sheet_zlevel[old];
+		//将原层数到新层数之间的图层上移一层
 		for(int i=old;i>z;i--){
 			sc->sheet_zlevel[i] = sc->sheet_zlevel[i-1];
 			sc->sheet_zlevel[i]->z ++;
 		}
+		//将原图层转移到目标层数
 		sc->sheet_zlevel[z] = temp;
 		sc->sheet_zlevel[z]->z = z;
 		int x1 =  sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
+				//对图层范围内遍历，如果显示图层不是当前图层跳过
 				if(screen_buf[i*320+j]!=&(sc->sheets[index])) continue;
 				else{
-					for(int k = old;k>=z;k--)
-						if(pix_in_sheet(j,i,k)){
+					//判断该像素是否有转移上去的图层覆盖，且不是透明色255。如果有就更新图层并渲染
+					for(int k = old;k>=z;k--){
+						int point = (i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x);
+						if(pix_in_sheet(j,i,k) && sc->sheet_zlevel[k]->buf[point]!=COLOR_TRANSP){
 							screen_buf[i*320+j] = sc->sheet_zlevel[k];
-							if(sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)]!=COLOR_TRANSP)screen[i*320+j] = sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)];
+							screen[i*320+j] = sc->sheet_zlevel[k]->buf[point];
 							break;
 						}
+					}
 				}
 			}
 		return;
 	}
-	else{//上调
+	else{
+		//上调
 		struct SHEET* temp = sc->sheet_zlevel[old];
 		for(int i=old;i<z;i++){
+			//将原层数到新层数之间的图层下调一层
 			sc->sheet_zlevel[i] = sc->sheet_zlevel[i+1];
 			sc->sheet_zlevel[i]->z--;
 		}
+		//将原图层转移到目标图层
 		sc->sheet_zlevel[z] = temp;
 		sc->sheet_zlevel[z]->z = z;
 		int x1 =  sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
+				int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
+				//在图层范围内遍历，如果显示图层是当前图层跳过，已经显示的像素上调后肯定显示
 				if(screen_buf[i*320+j]==&(sc->sheets[index])) continue;
-				else if(screen_buf[i*320+j]->z<z) {
+				//如果不是当前图层 且图层层数小于调整后层数 且当前图层该像素不是透明色 则更新图层并渲染
+				else if(screen_buf[i*320+j]->z<z && sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP) {
 					screen_buf[i*320+j] = sc->sheet_zlevel[z];
-					if(sc->sheet_zlevel[z]->buf[(i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x)]!=COLOR_TRANSP)screen[i*320+j] = sc->sheet_zlevel[z]->buf[(i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x)];
+					screen[i*320+j] = sc->sheet_zlevel[z]->buf[point];
 				}
 			}
 		return;
 	}
 }
 void sheet_hide(int index){
+	//如果本来就隐藏不作操作
 	if(sc->sheets[index].z<0);
 	else{
+		//将该图层上方的所有图层整体下移一层
 		for(int i = sc->sheets[index].z;i<sc->top;i++){
 			sc->sheet_zlevel[i] = sc->sheet_zlevel[i+1];
 			sc->sheet_zlevel[i]->z--;
 		}
+		// 总层数减1
 		sc->sheet_zlevel[sc->top] = (struct SHEET*)NULL;
 		sc->top--;
-		//update screen_buf:
 		int x1 =  sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
+				// 在隐藏的图层范围遍历，如果显示图层不是当前图层，不作操作
 				if(screen_buf[i*320+j]!=&(sc->sheets[index])) continue;
 				else{
-					for(int k = sc->sheets[index].z-1;k>=0;k--)
-						if(pix_in_sheet(j,i,k) && sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)]!=COLOR_TRANSP){
+					// 如果是当前图层，在这一图层下方的图层中寻找该像素是否有其他图层 且不是255透明色
+					for(int k = sc->sheets[index].z-1;k>=0;k--){
+						int point = (i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x);
+						if(pix_in_sheet(j,i,k) && sc->sheet_zlevel[k]->buf[point]!=COLOR_TRANSP){
 							screen_buf[i*320+j] = sc->sheet_zlevel[k];
-							screen[i*320+j] = sc->sheet_zlevel[k]->buf[(i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x)];
+							screen[i*320+j] = sc->sheet_zlevel[k]->buf[point];
 							break;
 						}
+					}
+					// 如果没有其它图层，该像素位置图层置空，渲染为默认黑色
 					if(screen_buf[i*320+j]==&(sc->sheets[index])){
 						screen_buf[i*320+j] = (struct SHEET*) NULL;
 						screen[i*320+j] = COLOR_BLACK;

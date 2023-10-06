@@ -23,7 +23,70 @@ CPU通过IO端口直接与这个芯片进行通信，对应的IO端口为0x60。
 ##### ALT_A20_GATE
 除了端口号0x60可以影响A20寻址，端口0x92也用于A20寻址，被称作“替代的A20门控制”
 其中，0x92端口的位0用于计算机重启，位1用于影响A20地址线。与0x60不同，0x92可以直接使用IN/OUT指令进行修改，方便快捷，因此也被称作Fast A20。0x60和0x92的位1进行或运算后连接到A20M#引脚，用于控制A20地址线的开启和关闭
-
+# BIOS功能
+### VESA/VBS
++ 对所有vesa方法，如果支持某个vesa方法返回al = 0x4f，ah作为状态标志。成功时ah = 0x00。
++ INT 0X10 AX = 0X4F00 ES:DI = RESUSLT
+  获得控制信息，返回所有支持的画面模式
+  ```c
+   struct VbeInfoBlock {               //total 512B  
+      char     VbeSignature[4];        // == "VESA"
+      uint16_t VbeVersion;             //版本 == 0x0300 for VBE 3.0
+      uint16_t OemStringPtr[2];        // segment:offset 指针指向OEM(原始设备制造商)字符串
+      uint8_t  Capabilities[4];        // 显卡能力？
+      uint16_t VideoModePtr[2];        // segment:offset 指针指向支持的显示模式 结尾会以0xffff结束
+      uint16_t TotalMemory;            // 64K显存数据块个数
+      uint16_t software_rev;           // 软件版本号
+      uint32_t vendor;                 // segment:offset 指针指向显卡厂商字符串
+      uint32_t product_name;           // segment:offset 指向显卡型号名称字符串
+      uint32_t product_rev;            // segment:offset 指向产品版本字符串
+      uint8_t  Reserved[478];
+   }
+  ```
++ INT 0X10 AX = 0X4F01 CX = MODE ,ES:DI = RESUSLT
+  获得对应模式信息。返回256B在es:di地址
+  ```c
+      struct vbe_mode_info_structure {
+         uint16_t attributes;		// 0x00 弃用，是否支持线性帧缓冲器
+         uint8_t window_a;			// 0x02 弃用
+         uint8_t window_b;			// 0x03 弃用
+         uint16_t granularity;	// 0x04 弃用
+         uint16_t window_size;   // 0x06 窗口大小
+         uint16_t segment_a;     // 0x08 
+         uint16_t segment_b;     // 0x0a
+         uint32_t win_func_ptr;	// 0x0c 弃用 
+         uint16_t pitch;			// 0x10 每个水平线？的字节数
+         uint16_t width;			// 0x12 x分辨率
+         uint16_t height;			// 0x14 y分辨率
+         uint8_t w_char;			// 0x16 未使用
+         uint8_t y_char;			// 0x17 ...
+         uint8_t planes;         // 0x18 平面？
+         uint8_t bpp;			   // 0x19 每个像素的字节数（色数）必须为8
+         uint8_t banks;			   // 0x1a 弃用
+         uint8_t memory_model;   // 0x1b 存储模式(颜色存贮方式，必须为4调色板法)
+         uint8_t bank_size;		// 0x1c 弃用
+         uint8_t image_pages;    // 0x1d ?
+         uint8_t reserved0;      // 0x1e 
+      
+         uint8_t red_mask;       // 0x1f
+         uint8_t red_position;   // 0x20
+         uint8_t green_mask;
+         uint8_t green_position;
+         uint8_t blue_mask;
+         uint8_t blue_position;
+         uint8_t reserved_mask;
+         uint8_t reserved_position;
+         uint8_t direct_color_attributes; //0x27
+      
+         uint32_t framebuffer;		// 0x28 vram的物理地址
+         uint32_t off_screen_mem_off;
+         uint16_t off_screen_mem_size;	
+         uint8_t reserved1[206];
+   }
+   ```
++ INT 0x10, AX=0x4F02, BX=mode, ES:DI=CRTCInfoBlock
+  设置画面模式，如果要使用的模式使用了线性帧缓冲器需要将mode or 0x4000 
+  可以在保护模式下执行，但是可能会重置gdt。
 # 要点信息
 1. A20的开启会对实模式和保护模式的下寻址产生影响影响，以下讨论均基于Intel 80386之后的处理器
 
@@ -51,6 +114,7 @@ CPU通过IO端口直接与这个芯片进行通信，对应的IO端口为0x60。
   |:-----:|:-----:|:----|
   |0f 01/2|LGDT m16&32||
   |0f 01/3|LIDT m16&32||
+
 # Tips
 + 对于nasm来说最好将数据段放在最后，不然会被当成代码段
 + 在没打开32位时只能使用16位（默认）编译，打开32位后的32位指令只能使用32位（bits 32）编译

@@ -3,12 +3,14 @@
 ;初始化寄存器
 ;BOOT SECTION
 ;SECTION 1
-LOAD_SECTION1 EQU 2
-LOAD_SECTION_NUM1 EQU 17
+; LOAD_SECTION1 EQU 2
+; LOAD_SECTION_NUM1 EQU 17
 LOAD_BASE_DIRECTION1 EQU 0X900
-LOAD_SECTION2 EQU 1
-LOAD_SECTION_NUM2 EQU 18
-LOAD_BASE_DIRECTION2 EQU 0XB20
+CYCLE_NUM EQU 10
+VEAS_ES EQU 0X100
+; LOAD_SECTION2 EQU 1
+; LOAD_SECTION_NUM2 EQU 18
+; LOAD_BASE_DIRECTION2 EQU 0XB20
 mov ax,0
 mov ds,ax
 mov es,ax
@@ -36,53 +38,44 @@ load_system:
 	mov dx,0100h
 	mov bx,000ch
 	int 10h
-	mov si,0 ;记录尝试读取次数
-	try1:
-		;先读柱面0 磁头0 2-18扇区 8.5K 101000 - 103200
-		mov ax,LOAD_BASE_DIRECTION1
-		mov es,ax
-		mov ah,02h
-		mov al,LOAD_SECTION_NUM1
+	;读取10柱面，共179.5KB rosboot.bin不超过0x2D000
+	mov ax,LOAD_BASE_DIRECTION1
+	mov es,ax
+	mov cx,0002h 	;柱面0 扇区2
+	mov dh,0		;磁头0
+testloop:
+	mov si,0		;读取失败次数
+	try:
+		mov ah,2
+		mov al,1 	;1个扇区
 		mov bx,0
-		mov ch,0
-		mov cl,LOAD_SECTION1
-		mov dx,0
+		mov dl,0
 		int 13h
-		test ah,0
-		je finish1
+		jnc next
 		add si,1
 		cmp si,5
-		jnb error
+		jae catch
 		mov ah,0
 		mov dl,0
-		int 13h ;磁盘复位
-		jmp try1
-	finish1:
-		mov ah,0
-		mov dl,0
-		int 13h ;磁盘复位
-		mov si,0
-	try2:
-		;0 1 1-18 9K
-		mov ax,LOAD_BASE_DIRECTION2
-		mov es,ax
-		mov ah,02h
-		mov al,LOAD_SECTION_NUM2
-		mov bx,0
-		mov ch,0
-		mov cl,LOAD_SECTION2
-		mov dx,0100h
 		int 13h
-		test ah,0
-		je finish2
-		add si,1
-		cmp si,5
-		jnb error
-		mov ah,0
-		mov dl,0
-		int 13h ;磁盘复位
-		jmp try2
-	finish2:
+		jmp try
+	next:
+		mov ax,es
+		add ax,20h
+		mov es,ax
+		add cl,1
+		cmp cl,18
+		jbe testloop
+		mov cl,1
+		add dh,1
+		cmp dh,2
+		jb testloop
+		mov dh,0
+		add ch,1
+		cmp ch,CYCLE_NUM
+		jbe testloop
+		
+	finish:
 		mov ax,0
 		mov es,ax
 		mov ax,bootmessage3
@@ -93,7 +86,8 @@ load_system:
 		mov bx,000ch
 		int 10h
 		ret
-	error:
+
+	catch:
 		mov ax,0
 		mov es,ax
 		mov ax,booterror1
@@ -117,6 +111,15 @@ dw 0xAA55
 ;SYSTEM SECTION
 ;SECTION 2 & OTHERS
 
+mov ax,VEAS_ES
+mov es,ax
+mov di,0
+mov ax,0x4f00
+int 10h
+cmp ax,0x004f
+jne scrn_defult
+
+mov ax,ds:
 mov ax,0
 mov es,ax
 mov ax,0x901a
