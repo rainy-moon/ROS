@@ -2,15 +2,16 @@
 
 ;初始化寄存器
 ;BOOT SECTION
-;SECTION 1
-; LOAD_SECTION1 EQU 2
-; LOAD_SECTION_NUM1 EQU 17
-LOAD_BASE_DIRECTION1 EQU 0X900
-CYCLE_NUM EQU 10
-VEAS_ES EQU 0X100
-; LOAD_SECTION2 EQU 1
-; LOAD_SECTION_NUM2 EQU 18
-; LOAD_BASE_DIRECTION2 EQU 0XB20
+
+LOAD_BASE_DIRECTION1 	EQU 0X900
+CYCLE_NUM				EQU 10
+VEAS_ES 				EQU 0X100
+SCRN_MODE_ES 			EQU 0x200
+VMODE					EQU 0X0FF2	;颜色数目信息(颜色位数)
+SCRNX 					EQU 0X0FF4	;x分辨率地址
+SCRNY					EQU 0X0FF8	;y分辨率地址
+VRAM					EQU 0X0FFc	;图像缓冲区开始地址
+
 mov ax,0
 mov ds,ax
 mov es,ax
@@ -18,6 +19,11 @@ mov ss,ax
 mov sp,7c00h
 call boot
 call load_system
+mov byte [VMODE],8
+mov dword [SCRNX],320
+mov dword [SCRNY],200
+mov dword [VRAM],0xa0000
+call scrnmode_select
 jmp 9000h
 
 boot:
@@ -87,6 +93,80 @@ testloop:
 		int 10h
 		ret
 
+scrnmode_select: ;0x7cc7
+	mov dx,0
+	mov ax,VEAS_ES
+	mov es,ax
+	mov di,0
+	mov ax,0x4f00
+	int 10h
+	cmp ax,0x004f
+	jne scrn_defult
+	mov ax,[es:di+16]
+	mov si,[es:di+14]
+	mov ds,ax
+	mov di,0
+	mov ax,SCRN_MODE_ES
+	mov es,ax
+	modeloop:
+		mov cx,[ds:si]
+		cmp cx,0xffff 
+		je scrn_fin
+		mov ax,0x4f01
+		int 10h
+		cmp ax,0x004f ;0x7cfb
+		jne next_mode
+		mov al,[es:di+0x19]
+		cmp al,8
+		jne next_mode
+		mov al,[es:di+0x1b]
+		cmp al,4
+		jne next_mode
+		mov ax,[es:di]
+		and ax,0x0080
+		jz next_mode
+		;0x7d18 可用调色板画面模式,x\y都是32位，要修改后16位
+		mov ax,ds
+		push ax
+		mov ax,0
+		mov ds,ax
+		mov WORD bx,[SCRNX]
+		mov ax,[es:di+0x12]
+		cmp ax,bx
+		jbe next_mode_pre
+		mov dx,cx
+		mov WORD [SCRNX],ax
+		mov ax,[es:di+0x14]
+		mov WORD [SCRNY],ax
+		;0x7d38 注意这里vram应该是32位，默认后16位为0，如果有错误要修改
+		mov  WORD ax,[es:di+0x28+2]
+		mov  WORD [VRAM+2],ax
+	next_mode_pre:
+		pop ax
+		mov ds,ax
+		mov word ax,[es:di+0x12]
+		cmp ax,1024
+		jae scrn_fin
+	next_mode:
+		add si,2
+		jmp modeloop
+		
+	scrn_defult:
+		mov al,0x13
+		mov ah,0
+		int 10h
+		ret
+	scrn_fin: ;0x7d57
+		cmp dx,0
+		je scrn_defult
+		mov ax,0x4f02
+		mov bx,dx
+		or bx,0x4000
+		int 10h
+		cmp ax,0x004f
+		jne scrn_defult
+		ret
+
 	catch:
 		mov ax,0
 		mov es,ax
@@ -111,15 +191,6 @@ dw 0xAA55
 ;SYSTEM SECTION
 ;SECTION 2 & OTHERS
 
-mov ax,VEAS_ES
-mov es,ax
-mov di,0
-mov ax,0x4f00
-int 10h
-cmp ax,0x004f
-jne scrn_defult
-
-mov ax,ds:
 mov ax,0
 mov es,ax
 mov ax,0x901a

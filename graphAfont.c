@@ -17,7 +17,7 @@ void init_color_plate(){
 		{0x84,0x84,0x00},	//12：暗黄
 		{0x84,0x00,0x84},	//13：暗紫
 		{0x00,0x84,0x84},	//14: 浅暗蓝
-		{0x84,0x84,0x84}	//15: 暗灰
+		{0x84,0x84,0x84},	//15: 暗灰
 	};
 	cli();
 	io_out8(0x03c8,0);
@@ -67,43 +67,125 @@ unsigned char* g_edgefill(int board, int width,int height,unsigned char color){
 	return p;
 }
 /**
- * @brief 在某一图层的内容数组buf上的相对位置加上一个字符
+ * @brief 不新建数组，填充矩形，需要手动刷新
  * 
+ * @param p 数组
+ * @param sizex 该数组矩形区域宽度
+ * @param x0 相对位置坐标
+ * @param y0 相对位置坐标
+ * @param width 填充宽度
+ * @param height 填充高度
+ * @param color 
+ */
+void g_v_boxfill(unsigned char*p,int sizex, int x0,int y0,int width,int height,unsigned char color){
+	int start = y0*sizex+x0;
+	for(int i=0;i<height;i++){
+		for(int j = start;j<start+width;j++){
+			p[j]=color;
+		}
+		start+=sizex;
+	}
+	return;
+}
+/**
+ * @brief 不新建数组，在已有数组上加边框，需要手动刷新
+ * 
+ * @param p 数组
+ * @param sizex 原数组矩形区域宽度
+ * @param x0 起始左上角相对x坐标
+ * @param y0 起始左上角相对y坐标
+ * @param board 
+ * @param width 边框长度
+ * @param height 边框宽度
+ * @param color 
+ */
+void g_v_edgefill(unsigned char*p,int sizex, int x0,int y0,int board,int width,int height,unsigned char color){
+	int i = x0*sizex+y0, mid = height-2*board;
+	int step1 = sizex-width;
+	int step2 = sizex-board;
+	for(int j = 1;j<=board;j++){
+		for(int k=0;k<width;k++,i++){
+			p[i]=color;
+			p[i+(height-board)*sizex]=color;
+		}
+		i += step1;
+	}
+	for(int j=1;j<=mid;j++){
+		for(int k=0;k<board;k++,i++){
+			p[i]=color;
+			p[i+width-board]=color;
+		}
+		i += step2;
+	}
+	return;
+}
+/**
+ * @brief 绘制标准窗口，包括标题，按钮，阴影，样式码：1
+ * 
+ * @param name 窗口标题
+ * @param width 宽度（如果超过窗口限制会自动调整满屏）
+ * @param height 高度（如果超过窗口限制会自动调整满屏）
+ * @param color 窗口背景色
+ * @return unsigned char* 
+ */
+unsigned char* g_windowfill(const char* name,int width,int height,unsigned char color){
+	if(height>sc->maxy) height = sc->maxy;
+	if(width>sc->maxx) width = sc->maxx;
+	unsigned char* p = (unsigned char*)mem_malloc(height*width);
+	//阴影绘制
+	g_v_edgefill(p,width,0,0,2,width,height,COLOR_WHITE);
+	g_v_edgefill(p,width,2,2,3,width-4,height-4,COLOR_LIGHT_GREY);
+	g_v_edgefill(p,width,5,5,1,width-10,height-10,COLOR_DARK_GREY);
+	//主窗体
+	g_v_boxfill(p,width,6,6,width-12,height-12,COLOR_WHITE);
+	//分割线
+	g_v_boxfill(p,width,6,28,width-12,2,COLOR_LIGHT_GREY);
+	//关闭
+	g_v_boxfill(p,width,width-28,9,16,16,1);
+	//窗口名
+	g_shows(p,name,12,9,COLOR_BLACK,width);
+	return p;
+}
+/**
+ * @brief 内容数组p上的相对位置加上一个字符,需要手动渲染
+ * 
+ * @param p 数组
  * @param c 字符
  * @param x0 相对位置x
  * @param y0 相对位置y
  * @param color 
- * @param index 想要绘制的图层
+ * @param sizex 原数组宽度
  */
-void g_showc(char c, int x0, int y0, char color ,int index){
+void g_showc(unsigned char*p, char c, int x0, int y0, char color ,int sizex){
 	
-	extern char WORDS[128][8];
-	unsigned char* p = sc->sheets[index].buf;
-	for(int y = y0;y < y0+8;y++){
+	extern char WORDS[128][16];
+	for(int y = y0;y < y0+16;y++){
 		for(int x = x0;x < x0+8;x++){
-			if(WORDS[c][y-y0] & (0x80>>(x-x0))) p[y*sc->sheets[index].width+x] = color;
+			if(WORDS[c][y-y0] & (0x80>>(x-x0))) p[y*sizex+x] = color;
 		}
 	}
 	return;
 }
 /**
- * @brief 在某一图层的内容数组buf上的相对位置加上一个字符串
+ * @brief 在某一图层的内容数组buf上的相对位置加上一个字符串，需要手动渲染
  * 
+ * @param p 原数组
  * @param string 
  * @param x0 相对位置x
  * @param y0 相对位置y
  * @param color 
- * @param index 想要绘制的图层
+ * @param sizex 原图层宽度
+ * @return int 字符串长度，不包括\0
  */
-void g_shows(const char* string, int x0, int y0, char color,int index){
+int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex){
 	
-	extern char WORDS[128][8];
+	extern char WORDS[128][16];
+	int count = 0;
 	int x = x0;
-	for(;*string;string++,x+=8){
-		g_showc(*string,x,y0,color,index);
+	for(;*string;string++,x+=8,count++){
+		g_showc(p,*string,x,y0,color,sizex);
 	}
-	sheet_refresh(index,x0,y0,x-x0,8);
-	return;
+	return count;
 }
 /**
  * @brief 初始化图层控制器
@@ -111,7 +193,7 @@ void g_shows(const char* string, int x0, int y0, char color,int index){
  */
 void init_sheet_ctrl(){
 	sc = (struct sheet_ctrl*)mem_malloc(sizeof(struct sheet_ctrl));
-	sc->maxx = 320;sc->maxy=200;
+	sc->maxx = *((int*)0xff4);sc->maxy=*((int*)0xff8);
 	sc->top = -1;
 	for(int i=0;i<MAX_SHEETS;i++){
 		sc->sheets[i].flag=0;
@@ -150,14 +232,14 @@ void sheet_updatez(int index,int z){
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
 				//对图层范围内遍历，如果显示图层不是当前图层跳过
-				if(screen_buf[i*320+j]!=&(sc->sheets[index])) continue;
+				if(screen_buf[i*sc->maxx+j]!=&(sc->sheets[index])) continue;
 				else{
 					//判断该像素是否有转移上去的图层覆盖，且不是透明色255。如果有就更新图层并渲染
 					for(int k = old;k>=z;k--){
 						int point = (i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x);
 						if(pix_in_sheet(j,i,k) && sc->sheet_zlevel[k]->buf[point]!=COLOR_TRANSP){
-							screen_buf[i*320+j] = sc->sheet_zlevel[k];
-							screen[i*320+j] = sc->sheet_zlevel[k]->buf[point];
+							screen_buf[i*sc->maxx+j] = sc->sheet_zlevel[k];
+							screen[i*sc->maxx+j] = sc->sheet_zlevel[k]->buf[point];
 							break;
 						}
 					}
@@ -182,11 +264,11 @@ void sheet_updatez(int index,int z){
 			for(int j=sc->sheets[index].x;j<x1;j++){
 				int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
 				//在图层范围内遍历，如果显示图层是当前图层跳过，已经显示的像素上调后肯定显示
-				if(screen_buf[i*320+j]==&(sc->sheets[index])) continue;
+				if(screen_buf[i*sc->maxx+j]==&(sc->sheets[index])) continue;
 				//如果不是当前图层 且图层层数小于调整后层数 且当前图层该像素不是透明色 则更新图层并渲染
-				else if(screen_buf[i*320+j]->z<z && sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP) {
-					screen_buf[i*320+j] = sc->sheet_zlevel[z];
-					screen[i*320+j] = sc->sheet_zlevel[z]->buf[point];
+				else if(screen_buf[i*sc->maxx+j]->z<z && sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP) {
+					screen_buf[i*sc->maxx+j] = sc->sheet_zlevel[z];
+					screen[i*sc->maxx+j] = sc->sheet_zlevel[z]->buf[point];
 				}
 			}
 		return;
@@ -209,21 +291,21 @@ void sheet_hide(int index){
 		for(int i = sc->sheets[index].y;i<y1;i++)
 			for(int j=sc->sheets[index].x;j<x1;j++){
 				// 在隐藏的图层范围遍历，如果显示图层不是当前图层，不作操作
-				if(screen_buf[i*320+j]!=&(sc->sheets[index])) continue;
+				if(screen_buf[i*sc->maxx+j]!=&(sc->sheets[index])) continue;
 				else{
 					// 如果是当前图层，在这一图层下方的图层中寻找该像素是否有其他图层 且不是255透明色
 					for(int k = sc->sheets[index].z-1;k>=0;k--){
 						int point = (i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x);
 						if(pix_in_sheet(j,i,k) && sc->sheet_zlevel[k]->buf[point]!=COLOR_TRANSP){
-							screen_buf[i*320+j] = sc->sheet_zlevel[k];
-							screen[i*320+j] = sc->sheet_zlevel[k]->buf[point];
+							screen_buf[i*sc->maxx+j] = sc->sheet_zlevel[k];
+							screen[i*sc->maxx+j] = sc->sheet_zlevel[k]->buf[point];
 							break;
 						}
 					}
 					// 如果没有其它图层，该像素位置图层置空，渲染为默认黑色
-					if(screen_buf[i*320+j]==&(sc->sheets[index])){
-						screen_buf[i*320+j] = (struct SHEET*) NULL;
-						screen[i*320+j] = COLOR_BLACK;
+					if(screen_buf[i*sc->maxx+j]==&(sc->sheets[index])){
+						screen_buf[i*sc->maxx+j] = (struct SHEET*) NULL;
+						screen[i*sc->maxx+j] = COLOR_BLACK;
 					}
 				}
 			}
@@ -251,10 +333,10 @@ void sheet_display(int index,int z){
 			for(int j=sc->sheets[index].x;j<x1;j++){
 				int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
 				//如果没有该像素处没有图层或者图层层数<新加图层 & 不是透明色255
-				if((sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP ) && (!screen_buf[i*320+j]||screen_buf[i*320+j]->z<z)) {
+				if((sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP ) && (!screen_buf[i*sc->maxx+j]||screen_buf[i*sc->maxx+j]->z<z)) {
 					//记录为当前图层，渲染颜色
-					screen_buf[i*320+j] = sc->sheet_zlevel[z];
-					screen[i*320+j] = sc->sheet_zlevel[z]->buf[point];
+					screen_buf[i*sc->maxx+j] = sc->sheet_zlevel[z];
+					screen[i*sc->maxx+j] = sc->sheet_zlevel[z]->buf[point];
 				}
 			}
 	}
@@ -294,7 +376,7 @@ void sheet_free(int index){
 	return;
 }
 void init_screen_buf(){
-	screen_buf = (struct SHEET **)mem_malloc(sizeof(unsigned int[200][320]));
+	screen_buf = (struct SHEET **)mem_malloc(sizeof(int[sc->maxy][sc->maxx]));
 	return;
 }
 /**
@@ -312,7 +394,7 @@ void sheet_refresh(int index,int x0,int y0,int width,int height){
 	//遍历需要更新部分
 	for(int i = y0;i<y1;i++)
 		for(int j=x0;j<x1;j++){
-			int point = (i+sc->sheets[index].y)*320+j+sc->sheets[index].x;
+			int point = (i+sc->sheets[index].y)*sc->maxx+j+sc->sheets[index].x;
 			//如果该像素不是透明色255 且显示为当前图层或没有图层 ，记录为当前图层，渲染颜色
 
 			if(sc->sheets[index].buf[i*sc->sheets[index].width+j] != COLOR_TRANSP){

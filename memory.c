@@ -46,6 +46,7 @@ void* mem_malloc(int size){
 				void* res = (void*)(0x520000+mem_scanner*0x400);
 				update_page_ctrl(size,mem_scanner,1);
 				mem_scanner = 0;
+				
 				return (void*)res;
 			}
 		}

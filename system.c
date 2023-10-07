@@ -154,8 +154,8 @@ void mouse_decode(){
 	mouse.y = -mouse.y;
 	//打印字符和更新鼠标，可能以后要转移到图层控制模块
 	
-	mouse.posx=(mouse.posx+mouse.x)%320;
-	mouse.posy=(mouse.posy+mouse.y)%200;
+	mouse.posx=(mouse.posx+mouse.x)%sc->maxx;
+	mouse.posy=(mouse.posy+mouse.y)%sc->maxy;
 	if(mouse.posx<0) mouse.posx=0;
 	if(mouse.posy<0) mouse.posy=0;
 	sheet_slide(mouse.posx,mouse.posy,windows[mouse.hwnd].sheet_index);

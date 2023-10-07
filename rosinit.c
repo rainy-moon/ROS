@@ -1,7 +1,7 @@
 #include"ros.h"
 
-//屏幕 320x200
-//存放软盘300处
+//屏幕 sc->maxxxsc->maxy
+//存放软盘2e0处
 void MAIN(){
 	//重新初始化全局描述符表和中断描述符表
 	struct GDT_SEG* gs  = (struct GDT_SEG*)0x00500000;
@@ -32,13 +32,15 @@ void MAIN(){
 	//初始化图层
 	init_sheet_ctrl();
 	//初始化屏幕图层记录map
+	unsigned char* *tp = (unsigned char**)0xffc;
+	screen = *tp;
 	init_screen_buf();
 	//显示鼠标
 	mouse_create();
 	//桌面图层
-	win_create("ROS_desktop",0,0,320,200,sc->top,6);
+	win_create("ROS_desktop",0,0,sc->maxx,sc->maxy,sc->top,6,0);
 	//调试窗口
-	win_create("debug",180,20,120,160,sc->top,0);
+	win_create("debug",200,100,500,400,sc->top,0,1);
 	
 	//初始化鼠标
 	cli();

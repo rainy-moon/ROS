@@ -46,6 +46,11 @@ struct window
 	int x0; int y0;
 	int width; int height;
 	int statu;
+	/*
+	* 0bit 1已使用 0未使用
+	* 1-3bit 状态位 000激活
+	* 4-7bit 窗口样式 0无边框(桌面鼠标等) 1标准窗口
+	*/
 	int sheet_index;//绑定图层
 }windows[MAX_WINDOWS];
 struct GDT_SEG
@@ -100,7 +105,7 @@ struct sheet_ctrl* sc;
 unsigned char kb_buffer[64];
 unsigned char ms_buffer[128];
 unsigned char s[20];
-unsigned char* screen = 0xa0000;
+unsigned char* screen;
 struct SHEET* *screen_buf;
 
 //sysfunc.asm 汇编定义函数，寄存器级操作
@@ -124,10 +129,12 @@ void stihlt();
 //graphAfont.c 图像画面操作函数
 
 void init_color_plate();
+void g_v_boxfill(unsigned char*p,int sizex, int x0,int y0,int width,int height,unsigned char color);
 unsigned char* g_boxfill(int width, int height, unsigned char color);
+void g_v_edgefill(unsigned char*p,int sizex, int x0,int y0,int board,int width,int height,unsigned char color);
 unsigned char* g_edgefill(int board, int width,int height,unsigned char color);
-void g_showc(char c, int x0, int y0, char color ,int index);
-void g_shows(const char* string, int x0, int y0, char color,int index);
+void g_showc(unsigned char*p, char c, int x0, int y0, char color ,int sizex);
+int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex);
 void init_sheet_ctrl();
 void sheet_updatez(int index,int z);
 void sheet_hide(int index);
@@ -142,7 +149,7 @@ void sheet_slide(int x,int y,int index);
 //窗口package windows.c
 
 int mouse_create();
-int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color);
+int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color, int style);
 void win_shows(int hwnd, char* s, unsigned char font_color);
 
 //部分c库简单复现 libc.c

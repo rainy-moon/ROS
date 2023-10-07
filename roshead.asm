@@ -12,16 +12,19 @@ FL_ROSINIT EQU 0x00101000;system init,screen init .etc 1M
 STACK	EQU 0x003fffff;栈底 1M
 GDTable EQU 0x00500000;GDT 64k
 IDTable EQU 0x00510000;LDT 2K
-mov sp,7c00h
-_w2dstart:
-mov al,0x13
-mov ah,0
-int 10h
-mov byte [VMODE],8
-mov dword [SCRNX],320
-mov dword [SCRNY],200
-mov dword [VRAM],0xa0000
-
+; _w2dstart:
+; mov al,0x13
+; mov ah,0
+; int 10h
+; mov byte [VMODE],8
+; mov dword [SCRNX],320
+; mov dword [SCRNY],200
+; mov dword [VRAM],0xa0000
+mov ax,0
+mov ds,ax
+mov es,ax
+mov ss,ax
+		
 mov ah,2
 int 16h
 mov byte [LEDS],al
@@ -83,7 +86,7 @@ fast_a20:
 in al,92h
 or al,2
 out 92h,al
-;BIOS中断打开
+
 
 
 lgdt [GDTR0]
