@@ -1,7 +1,7 @@
 #include"ros.h"
 
 void init_color_plate(){
-	unsigned char color_rgb[16][3] = {
+	unsigned char color_rgb[24][3] = {
 		{0x00,0x00,0x00}, 	//0：黑色
 		{0xff,0x00,0x00},	//1：亮红
 		{0x00,0xff,0x00},	//2：亮绿
@@ -18,10 +18,18 @@ void init_color_plate(){
 		{0x84,0x00,0x84},	//13：暗紫
 		{0x00,0x84,0x84},	//14: 浅暗蓝
 		{0x84,0x84,0x84},	//15: 暗灰
+		{246,246,246},		//16: 阴影用色1
+		{242,242,242},
+		{238,238,238},
+		{230,230,230},
+		{222,222,222},
+		{212,212,212},
+		{202,202,202},		
+		{190,190,190},		//23：阴影用色8
 	};
 	cli();
 	io_out8(0x03c8,0);
-	for(int i=0;i<16;i++){
+	for(int i=0;i<24;i++){
 		io_out8(0x03c9,color_rgb[i][0]/4);
 		io_out8(0x03c9,color_rgb[i][1]/4);
 		io_out8(0x03c9,color_rgb[i][2]/4);
@@ -133,9 +141,8 @@ unsigned char* g_windowfill(const char* name,int width,int height,unsigned char 
 	if(width>sc->maxx) width = sc->maxx;
 	unsigned char* p = (unsigned char*)mem_malloc(height*width);
 	//阴影绘制
-	g_v_edgefill(p,width,0,0,2,width,height,COLOR_WHITE);
-	g_v_edgefill(p,width,2,2,3,width-4,height-4,COLOR_LIGHT_GREY);
-	g_v_edgefill(p,width,5,5,1,width-10,height-10,COLOR_DARK_GREY);
+	for(int i = 0;i<8;i++)
+		g_v_edgefill(p,width,i,i,1,width-2*i,height-2*i,i+16);
 	//主窗体
 	g_v_boxfill(p,width,6,6,width-12,height-12,COLOR_WHITE);
 	//分割线
@@ -229,8 +236,8 @@ void sheet_updatez(int index,int z){
 		sc->sheet_zlevel[z]->z = z;
 		int x1 =  sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
-		for(int i = sc->sheets[index].y;i<y1;i++)
-			for(int j=sc->sheets[index].x;j<x1;j++){
+		for(int i = sc->sheets[index].y;i<y1&&i<sc->maxy;i++)
+			for(int j=sc->sheets[index].x;j<x1&&j>=0&&j<sc->maxx;j++){
 				//对图层范围内遍历，如果显示图层不是当前图层跳过
 				if(screen_buf[i*sc->maxx+j]!=&(sc->sheets[index])) continue;
 				else{
@@ -260,8 +267,8 @@ void sheet_updatez(int index,int z){
 		sc->sheet_zlevel[z]->z = z;
 		int x1 =  sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
-		for(int i = sc->sheets[index].y;i<y1;i++)
-			for(int j=sc->sheets[index].x;j<x1;j++){
+		for(int i = sc->sheets[index].y;i<y1&&i<sc->maxy;i++)
+			for(int j=sc->sheets[index].x;j<x1&&j>=0&&j<sc->maxx;j++){
 				int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
 				//在图层范围内遍历，如果显示图层是当前图层跳过，已经显示的像素上调后肯定显示
 				if(screen_buf[i*sc->maxx+j]==&(sc->sheets[index])) continue;
@@ -288,8 +295,8 @@ void sheet_hide(int index){
 		sc->top--;
 		int x1 =  sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
-		for(int i = sc->sheets[index].y;i<y1;i++)
-			for(int j=sc->sheets[index].x;j<x1;j++){
+		for(int i = sc->sheets[index].y;i<y1&&i<sc->maxy;i++)
+			for(int j=sc->sheets[index].x;j<x1&&j>=0&&j<sc->maxx;j++){
 				// 在隐藏的图层范围遍历，如果显示图层不是当前图层，不作操作
 				if(screen_buf[i*sc->maxx+j]!=&(sc->sheets[index])) continue;
 				else{
@@ -329,8 +336,8 @@ void sheet_display(int index,int z){
 		int x1 = sc->sheets[index].x+sc->sheets[index].width;
 		int y1 = sc->sheets[index].y+sc->sheets[index].height;
 		//遍历新加图层范围重新渲染
-		for(int i = sc->sheets[index].y;i<y1;i++)
-			for(int j=sc->sheets[index].x;j<x1;j++){
+		for(int i = sc->sheets[index].y;i<y1&&i<sc->maxy;i++)
+			for(int j=sc->sheets[index].x;j<x1&&j<sc->maxx&&j>=0;j++){
 				int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
 				//如果没有该像素处没有图层或者图层层数<新加图层 & 不是透明色255
 				if((sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP ) && (!screen_buf[i*sc->maxx+j]||screen_buf[i*sc->maxx+j]->z<z)) {
@@ -389,22 +396,24 @@ void init_screen_buf(){
  * @param height 需要更新的高度
  */
 void sheet_refresh(int index,int x0,int y0,int width,int height){
-	int x1 = x0+width;
-	int y1 = y0+height;
+	int y=y0+sc->sheets[index].y;
+	int x=x0+sc->sheets[index].x;
+	int x1 = x+width;
+	int y1 = y+height;
 	//遍历需要更新部分
-	for(int i = y0;i<y1;i++)
-		for(int j=x0;j<x1;j++){
-			int point = (i+sc->sheets[index].y)*sc->maxx+j+sc->sheets[index].x;
+	for(int i = y;i<y1&&i<sc->maxy;i++)
+		for(int j=x;j<x1&&j>=0&&j<sc->maxx;j++){
+			int point = i*sc->maxx+j;
 			//如果该像素不是透明色255 且显示为当前图层或没有图层 ，记录为当前图层，渲染颜色
-
-			if(sc->sheets[index].buf[i*sc->sheets[index].width+j] != COLOR_TRANSP){
+			int point2 = (i-sc->sheets[index].y)*sc->sheets[index].width+j-sc->sheets[index].x;
+			if(sc->sheets[index].buf[point2] != COLOR_TRANSP){
 				if(!screen_buf[point]) {
 					screen_buf[point] = &(sc->sheets[index]);
 					goto lable1;
 				}
 				
 				if(screen_buf[point] == &(sc->sheets[index]))
-lable1:				screen[point] = sc->sheets[index].buf[i*sc->sheets[index].width+j];
+lable1:				screen[point] = sc->sheets[index].buf[point2];
 			}
 		}
 }

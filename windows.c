@@ -53,10 +53,10 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 				buffer = g_boxfill(windows[i].width,windows[i].height, bg_color);
 				break;
 			case 1:
-				windows[i].x0-=6;
-				windows[i].y0-=6;
-				windows[i].width+=12;
-				windows[i].height+=36;
+				windows[i].x0-=8;
+				windows[i].y0-=8;
+				windows[i].width+=16;
+				windows[i].height+=40;
 				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color);
 				break;
 		}
