@@ -141,16 +141,16 @@ unsigned char* g_windowfill(const char* name,int width,int height,unsigned char 
 	if(width>sc->maxx) width = sc->maxx;
 	unsigned char* p = (unsigned char*)mem_malloc(height*width);
 	//阴影绘制
-	for(int i = 0;i<8;i++)
+	for(int i = 0;i<SHADOW_PIX;i++)
 		g_v_edgefill(p,width,i,i,1,width-2*i,height-2*i,i+16);
 	//主窗体
-	g_v_boxfill(p,width,6,6,width-12,height-12,COLOR_WHITE);
+	g_v_boxfill(p,width,SHADOW_PIX,SHADOW_PIX,width-2*SHADOW_PIX,height-2*SHADOW_PIX,COLOR_WHITE);
 	//分割线
-	g_v_boxfill(p,width,6,28,width-12,2,COLOR_LIGHT_GREY);
+	g_v_boxfill(p,width,SHADOW_PIX,SHADOW_PIX+22,width-2*SHADOW_PIX,2,COLOR_LIGHT_GREY);
 	//关闭
-	g_v_boxfill(p,width,width-28,9,16,16,1);
+	g_v_boxfill(p,width,width-SHADOW_PIX-22,SHADOW_PIX+3,16,16,1);
 	//窗口名
-	g_shows(p,name,12,9,COLOR_BLACK,width);
+	g_shows(p,name,SHADOW_PIX+6,SHADOW_PIX+3,COLOR_BLACK,width);
 	return p;
 }
 /**

@@ -36,6 +36,7 @@
 #define AR_INTGATE32	0x8e00
 #define MAX_SHEETS		32
 #define MAX_WINDOWS		10
+#define SHADOW_PIX		8
 #define NULL  			0
 struct window
 {
@@ -80,6 +81,17 @@ struct io_buffer{
 	int p,q,size;
 	char flags;
 };
+/**
+ * @brief 模拟链表
+ * @param size 链表能使用总长度
+ * @param length 当前链表长度
+ */
+struct SIMLIST{
+	int head;int size;
+	int length;
+	int* values;
+	int* next;
+}
 struct MOUSE{
 	char mouse_state[3];
 	int hwnd;//窗口id
@@ -98,7 +110,7 @@ struct sheet_ctrl{
 	struct SHEET *sheet_zlevel[MAX_SHEETS];
 	struct SHEET sheets[MAX_SHEETS];
 };
-
+int time_count = 1;
 struct io_buffer kb_buffer_ctrl;
 struct io_buffer ms_buffer_ctrl;
 struct sheet_ctrl* sc;
@@ -121,6 +133,7 @@ unsigned short io_in16(int port);
 unsigned int io_in32(int port);
 void load_gdt(int limit,int addr);
 void load_idt(int limit,int addr);
+void asm_inthandler20h();
 void asm_inthandler21h();
 void asm_inthandler27h();
 void asm_inthandler2ch();
@@ -150,7 +163,8 @@ void sheet_slide(int x,int y,int index);
 
 int mouse_create();
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color, int style);
-void win_shows(int hwnd, char* s, unsigned char font_color);
+void win_showsln(int hwnd, char* s, unsigned char font_color);
+void win_showslr(int hwnd, char* s, unsigned char font_color);
 
 //部分c库简单复现 libc.c
 /**
@@ -174,6 +188,7 @@ void my_sprintf(char* s,const char* ss,...);
 void set_gdt_segment(struct GDT_SEG *gs, unsigned int limit, unsigned int base, char ar,int type);
 void set_idt_segment(struct IDT_INTGATE* ii, unsigned int offset,unsigned int selector, int settings);
 void init_PIC();
+void init_PIT();
 void init_io_buffer(struct io_buffer* iobuf,int size,unsigned char* buffer);
 int io_buffer_push(struct io_buffer* buffer,unsigned char data);
 int io_buffer_pop(struct io_buffer* buffer);

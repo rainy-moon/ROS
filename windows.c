@@ -53,10 +53,10 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 				buffer = g_boxfill(windows[i].width,windows[i].height, bg_color);
 				break;
 			case 1:
-				windows[i].x0-=8;
-				windows[i].y0-=8;
-				windows[i].width+=16;
-				windows[i].height+=40;
+				windows[i].x0-=SHADOW_PIX;
+				windows[i].y0-=SHADOW_PIX;
+				windows[i].width+=2*SHADOW_PIX;
+				windows[i].height+=2*SHADOW_PIX+24;
 				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color);
 				break;
 		}
@@ -68,20 +68,36 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 		windows[i].name[j] = '\0';
 		windows[i].statu |= (style<<4)+0x1;
 		//g_shows(name,0,0,7,windows[i].sheet_index);
-		windows[i].cursor_x = 6;
-		windows[i].cursor_y = 24;
+		windows[i].cursor_x = 14;
+		windows[i].cursor_y = 36;
 		return i;
 	}
 	return -1;
 }
-
-void win_shows(int hwnd, char* s, unsigned char font_color){
-	/**
-	 * @brief 在窗口内打印字符串，该函数暂时是自动换行
-	 * @param int hwnd, char* s, int length, unsigned char font_color
-	 */
+/**
+ * @brief 输出一行，自动换到下一行
+ * 
+ * @param hwnd 
+ * @param s 
+ * @param font_color 
+ */
+void win_showsln(int hwnd, char* s, unsigned char font_color){
 	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
 	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,length*8,16);
 	windows[hwnd].cursor_y+=16;
+	return;
+}
+/**
+ * @brief 在当前行反复显示（自动回车）
+ * 先默认背景色是白色，以后再进行修改
+ * @param hwnd 
+ * @param s 
+ * @param font_color 
+ */
+void win_showslr(int hwnd,char* s, unsigned char font_color){
+	//清空一行
+	g_v_boxfill(sc->sheets[windows[hwnd].sheet_index].buf,windows[hwnd].width,windows[hwnd].cursor_x,windows[hwnd].cursor_y,windows[hwnd].width-16,16,COLOR_WHITE);
+	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
+	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,length*8,16);
 	return;
 }

@@ -11,10 +11,12 @@ global _io_in32
 global _load_gdt
 global _load_idt
 global _WORDS
+global _asm_inthandler20h
 global _asm_inthandler21h
 global _asm_inthandler27h
 global _asm_inthandler2ch
 global _stihlt
+extern _inthandler20h
 extern _inthandler21h
 extern _inthandler27h
 extern _inthandler2ch
@@ -79,6 +81,21 @@ _load_idt:; void load_idt(int limit,int addr)
 	mov [esp+6],ax
 	lidt [esp+6]
 	ret
+_asm_inthandler20h: ;void asm_inthandler20h()
+	push es
+	push ds
+	pushad
+	mov eax,esp
+	push eax
+	mov ax,ss
+	mov ds,ax
+	mov es,ax
+	call _inthandler20h
+	pop eax
+	popad
+	pop ds
+	pop es
+	iretd
 _asm_inthandler21h: ;void asm_inthandler21h()
 	push es
 	push ds
