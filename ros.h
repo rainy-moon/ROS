@@ -81,17 +81,7 @@ struct io_buffer{
 	int p,q,size;
 	char flags;
 };
-/**
- * @brief 模拟链表
- * @param size 链表能使用总长度
- * @param length 当前链表长度
- */
-struct SIMLIST{
-	int head;int size;
-	int length;
-	int* values;
-	int* next;
-}
+
 struct MOUSE{
 	char mouse_state[3];
 	int hwnd;//窗口id
@@ -99,6 +89,7 @@ struct MOUSE{
 	int ms_state,btn; 
 	int posx,posy; //鼠标位置
 }mouse;
+
 struct SHEET{
 	int z,width,height;
 	int x,y;
@@ -204,4 +195,28 @@ void update_page_ctrl(int size,int start,int mode);
 void* mem_malloc(int size);
 void init_page_ctrl();
 int mem_free(void* addr,int size);
+
+//simlist.c 模拟链表函数
+/**
+ * @brief 模拟链表
+ * @param size 链表能使用总长度
+ * @param length 当前链表长度
+ */
+struct SIMLIST{
+	struct node* head;
+	int size;
+};
+struct node{
+	int val[255];
+	struct node* next;
+};
+struct SIMLIST* init_simlist();
+struct SIMLIST* simlist_insert(struct SIMLIST* sl,int index,struct node*new);
+struct SIMLIST* simlist_delete(struct SIMLIST* sl,int index);
+struct node* simlist_get(struct SIMLIST* sl,int index);
+struct SIMLIST* simlist_free(struct SIMLIST* sl);
+struct SIMLIST* simlist_sortedinsert(struct SIMLIST* sl,struct node* new,int index);
+
+//timerAmultitask.c 计时器和多任务
+
 #endif
