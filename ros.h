@@ -36,7 +36,8 @@
 #define AR_INTGATE32	0x8e00
 #define MAX_SHEETS		32
 #define MAX_WINDOWS		10
-#define SHADOW_PIX		8
+#define MAX_TIMER		256
+#define SHADOW_PIX		6
 #define NULL  			0
 struct window
 {
@@ -101,15 +102,7 @@ struct sheet_ctrl{
 	struct SHEET *sheet_zlevel[MAX_SHEETS];
 	struct SHEET sheets[MAX_SHEETS];
 };
-int time_count = 1;
-struct io_buffer kb_buffer_ctrl;
-struct io_buffer ms_buffer_ctrl;
-struct sheet_ctrl* sc;
-unsigned char kb_buffer[64];
-unsigned char ms_buffer[128];
-unsigned char s[20];
-unsigned char* screen;
-struct SHEET* *screen_buf;
+
 
 //sysfunc.asm 汇编定义函数，寄存器级操作
 
@@ -186,6 +179,7 @@ int io_buffer_pop(struct io_buffer* buffer);
 int io_buffer_num(struct io_buffer* buffer);
 void init_keyboard();
 void enable_mouse();
+void get_timer_input();
 void get_keyboard_input();
 int get_mouse_input(int ms_state);
 
@@ -218,5 +212,45 @@ struct SIMLIST* simlist_free(struct SIMLIST* sl);
 struct SIMLIST* simlist_sortedinsert(struct SIMLIST* sl,struct node* new,int index);
 
 //timerAmultitask.c 计时器和多任务
+struct timer_ctrl{
+	struct SIMLIST* timelist;
+	int time;
+	int num;
+}tc;
+/**
+ * @brief 计时器
+ * @param timeout 超时时的当前计数（time+tc.time）
+ * @param time 计时长度
+ * @param data 超时时向缓冲区内写的内容
+ * @param flags 状态标志位
+ * 0bit 0循环任务 1单次任务
+ */
+struct timer{
+	unsigned int timeout;
+	unsigned int time;
+	int flags;
+	int tid;
+	int data;
+	int reserve[251];
+	struct timer* next;
+};
+int init_timerctrl();
+int timer_malloc(unsigned int timeout,int flags,int data);
+int timer_delete(int tid);
+int timer_reset(int tid,unsigned int timeout,int flags,int data);
+int timer_toc();
 
+
+//全局量
+int time_count = 0;
+struct io_buffer kb_buffer_ctrl;
+struct io_buffer ms_buffer_ctrl;
+struct io_buffer tm_buffer_ctrl;
+struct sheet_ctrl* sc;
+unsigned char kb_buffer[64];
+unsigned char ms_buffer[128];
+unsigned char tm_buffer[128];
+unsigned char s[20];
+unsigned char* screen;
+struct SHEET* *screen_buf;
 #endif

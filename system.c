@@ -214,6 +214,19 @@ int get_mouse_input(int ms_state){
 	}
 	return ms_state;	
 }
+void get_timer_input(){
+	if(io_buffer_num(&tm_buffer_ctrl)){
+		int data = io_buffer_pop(&tm_buffer_ctrl);
+		switch(data){
+			case 34:
+				my_sprintf(s,"10sec %d",time_count);
+				win_showsln(2,s,COLOR_BLACK);
+				time_count = 0;
+				break;
+		}
+	}
+	return;
+}
 /**
  * @brief 时钟中断程序
  * 
@@ -224,7 +237,9 @@ void inthandler20h(int* esp){
 	/**
 	 * @todo 时钟中断处理
 	 */
-	time_count++;
+	tc.time++;
+	if(((struct timer*)tc.timelist->head)->timeout<=tc.time)
+		timer_toc();
 	return;
 }
 /**

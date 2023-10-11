@@ -24,6 +24,7 @@ void MAIN(){
 	//初始化io缓冲区
 	init_io_buffer(&kb_buffer_ctrl,64,kb_buffer);
 	init_io_buffer(&ms_buffer_ctrl,128,ms_buffer);
+	init_io_buffer(&tm_buffer_ctrl,128,tm_buffer);
 	//初始化鼠标
 	init_keyboard();
 	enable_mouse();
@@ -32,7 +33,6 @@ void MAIN(){
 	io_out8(PIC0_IMR, 0xf8); 
 	io_out8(PIC1_IMR, 0xef);
 	
-
 	//初始化页表
 	init_page_ctrl();
 	//初始化调色板
@@ -49,22 +49,24 @@ void MAIN(){
 	win_create("ROS_desktop",0,0,sc->maxx,sc->maxy,sc->top,6,0);
 	//调试窗口
 	win_create("debug",200,100,500,400,sc->top,0,1);
-	
-	
-	
-	
+	//初始化计时器
+	init_timerctrl();
+
 	mouse.x=0;mouse.y=0;
 	mouse.ms_state=0;
 	mouse.posx = 160;mouse.posy=100;
+	//加入10s计时器
+	timer_malloc(1000,0,34);
+
 	while(1) {
-		my_sprintf(s,"%d",time_count);
-		win_showslr(2,s,COLOR_BLACK);
+		time_count++;
 		// int length = g_shows(sc->sheets[windows[2].sheet_index].buf,s,windows[2].cursor_x,windows[2].cursor_y,COLOR_BLACK,windows[2].width);
 		// sheet_refresh(windows[2].sheet_index,windows[2].cursor_x,windows[2].cursor_y,length*8,16);
 		cli();
+		get_timer_input();
 		get_keyboard_input();
 		mouse.ms_state = get_mouse_input(mouse.ms_state);
-		stihlt();
+		sti();
 	}
 	return;
 }
@@ -74,3 +76,4 @@ void MAIN(){
 #include"libc.c"
 #include"memory.c"
 #include"simlist.c"
+#include"timerAmultitask.c"
