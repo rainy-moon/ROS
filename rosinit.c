@@ -73,3 +73,4 @@ void MAIN(){
 #include"windows.c"
 #include"libc.c"
 #include"memory.c"
+#include"simlist.c"

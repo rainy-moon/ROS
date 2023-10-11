@@ -29,7 +29,7 @@ void init_page_ctrl(){
 }
 /**
  * @brief 页分配内存，每次至少1kb（一页），不足会补足
- * 
+ * 失败返回0 成功返回地址
  * @param size 
  * @return void* 
  */
