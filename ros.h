@@ -204,16 +204,16 @@ struct node{
 	int val[255];
 	struct node* next;
 };
-struct SIMLIST* init_simlist();
-struct SIMLIST* simlist_insert(struct SIMLIST* sl,int index,struct node*new);
-struct SIMLIST* simlist_delete(struct SIMLIST* sl,int index);
+void init_simlist(struct SIMLIST* sl);
+int simlist_insert(struct SIMLIST* sl,int index,struct node*new);
+int simlist_delete(struct SIMLIST* sl,int index);
 struct node* simlist_get(struct SIMLIST* sl,int index);
-struct SIMLIST* simlist_free(struct SIMLIST* sl);
-struct SIMLIST* simlist_sortedinsert(struct SIMLIST* sl,struct node* new,int index);
+int simlist_free(struct SIMLIST* sl);
+void simlist_sortedinsert(struct SIMLIST* sl,struct node* new,int index);
 
 //timerAmultitask.c 计时器和多任务
 struct timer_ctrl{
-	struct SIMLIST* timelist;
+	struct SIMLIST timelist;
 	int time;
 	int num;
 }tc;
@@ -240,7 +240,25 @@ int timer_delete(int tid);
 int timer_reset(int tid,unsigned int timeout,int flags,int data);
 int timer_toc();
 
-
+struct prograss{
+	int cs;
+	int statu;
+	int flags;
+	int parent;
+	int pid;
+	int level;
+	int tss;
+	int reserve[249];
+};
+struct prograss_ctrl{
+	int stt_tid;			//switch task timer tid
+	struct prograss *PC; 	//当前进行进程
+	struct SIMLIST PR;		//就绪进程链表
+	struct SIMLIST PS;		//中断挂起链表
+	struct SIMLIST PD;		//不可中断挂起链表
+	struct SIMLIST PZ;		//僵尸进程链表
+	struct SIMLIST PN;		//创建或等待就绪链表
+}multipc;
 //全局量
 int time_count = 0;
 struct io_buffer kb_buffer_ctrl;

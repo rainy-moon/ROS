@@ -5,7 +5,7 @@
  * @return int 
  */
 int init_timerctrl(){
-	tc.timelist=init_simlist();
+	init_simlist(&(tc.timelist));
 	struct timer* guard = mem_malloc(sizeof(struct timer));
 	if(!guard) return 0;
 	guard->time = 0xffff;
@@ -14,7 +14,7 @@ int init_timerctrl(){
 	guard->tid = 0x0;
 	guard->data = 0xff;
 	cli();
-	tc.timelist=simlist_sortedinsert(tc.timelist,(struct node*)guard,0);
+	simlist_sortedinsert(&(tc.timelist),(struct node*)guard,0);
 	tc.num=1;
 	tc.time=0;
 	sti();
@@ -22,8 +22,8 @@ int init_timerctrl(){
 }
 /**
  * @brief 新加计时器
- * 失败返回0，成功返回1
- * @param timeout 计时10ms*timeout
+ * 失败返回0，成功返回计时器tid
+ * @param time 计时10ms*time
  * @param flags 
  * @param data 
  * @return int 
@@ -35,13 +35,13 @@ int timer_malloc(unsigned int time,int flags,int data){
 	t->flags = flags;
 	t->data = data;
 	t->time = time;
-	t->tid = tc.num-1;
+	t->tid = tc.num;
 	cli();
 	t->timeout=time+tc.time;
-	tc.timelist=simlist_sortedinsert(tc.timelist,(struct node*)t,0);
+	simlist_sortedinsert(&(tc.timelist),(struct node*)t,0);
 	tc.num++;
 	sti();
-	return 1;
+	return t->tid;
 }
 /**
  * @brief 删除计时器
@@ -51,13 +51,13 @@ int timer_malloc(unsigned int time,int flags,int data){
  */
 int timer_delete(int tid){
 	int index=0;
-	struct timer* t=(struct timer*)tc.timelist->head;
+	struct timer* t=(struct timer*)(tc.timelist.head);
 	for(;index<tc.num;index++){
 		if(t->tid==tid) break;
 		else t = t->next;
 	}
 	if(index >= tc.num) return 0;
-	if(!simlist_delete(tc.timelist,index)) return 0;
+	if(!simlist_delete(&(tc.timelist),index)) return 0;
 	tc.num--;
 	return 1;
 }
@@ -72,7 +72,7 @@ int timer_delete(int tid){
  */
 int timer_reset(int tid,unsigned int time,int flags,int data){
 	int index=0;
-	struct timer* t=(struct timer*)tc.timelist->head;
+	struct timer* t=(struct timer*)(tc.timelist.head);
 	for(;index<tc.num;index++){
 		if(t->tid==tid) break;
 		else t = t->next;
@@ -94,12 +94,22 @@ int timer_reset(int tid,unsigned int time,int flags,int data){
  * @return int 
  */
 int timer_toc(){
-	io_buffer_push(&tm_buffer_ctrl,((struct timer*)tc.timelist->head)->data);
-	if((((struct timer*) tc.timelist->head)->flags&0x00000001) == 0){
-		int time = ((struct timer*)tc.timelist->head)->time;
-		int flags = ((struct timer*)tc.timelist->head)->flags;
-		int data = ((struct timer*)tc.timelist->head)->data;
-		return (timer_delete(((struct timer*)tc.timelist->head)->tid) && timer_malloc(time,flags,data));
+	io_buffer_push(&tm_buffer_ctrl,(((struct timer*)(tc.timelist.head))->data));
+	if((((struct timer*) tc.timelist.head)->flags&0x00000001) == 0){
+		int time = ((struct timer*)tc.timelist.head)->time;
+		int flags = ((struct timer*)tc.timelist.head)->flags;
+		int data = ((struct timer*)tc.timelist.head)->data;
+		return (timer_delete(((struct timer*)tc.timelist.head)->tid) && timer_malloc(time,flags,data));
 	}
-	else return timer_delete(((struct timer*)tc.timelist->head)->tid);
+	else return timer_delete(((struct timer*)tc.timelist.head)->tid);
+}
+
+int init_multipc(){
+	multipc.stt_tid = timer_malloc(2,0,1);
+	init_simlist(&(multipc.PR));
+	init_simlist(&(multipc.PS));
+	init_simlist(&(multipc.PD));
+	init_simlist(&(multipc.PZ));
+	init_simlist(&(multipc.PN));
+	
 }

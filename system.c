@@ -238,7 +238,7 @@ void inthandler20h(int* esp){
 	 * @todo 时钟中断处理
 	 */
 	tc.time++;
-	if(((struct timer*)tc.timelist->head)->timeout<=tc.time)
+	if(((struct timer*)tc.timelist.head)->timeout<=tc.time)
 		timer_toc();
 	return;
 }
