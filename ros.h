@@ -103,7 +103,15 @@ struct sheet_ctrl{
 	struct SHEET sheets[MAX_SHEETS];
 };
 
-
+struct TSS{
+	int esp0,ss0,esp1,ss1,esp2,ss2;
+	int gr3;
+	int eip,eflags;
+	int eax,ecx,edx,ebx,esp,ebp,esi,edi;
+	int es,cs,ss,ds,fs,gs;
+	int ldtr;
+	int iomap;
+};
 //sysfunc.asm 汇编定义函数，寄存器级操作
 
 void hlt();

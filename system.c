@@ -52,6 +52,9 @@ void set_idt_segment(struct IDT_INTGATE* ii, unsigned int offset,unsigned int se
 	ii->offset_high = (offset>>16)&0xffff;
 	return;
 }
+void set_tss_segment(struct GDT_GATE){
+	
+}
 void wait_kbc_ready(){
 	while(1)
 	{
