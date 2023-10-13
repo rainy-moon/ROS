@@ -93,10 +93,14 @@ CPU通过IO端口直接与这个芯片进行通信，对应的IO端口为0x60。
 在实模式下，处理器的寻址仅涉及CS和IP两个寄存器，即CS<<4+IP，对应的线性地址为0h-10ffefh。当A20地址线处于关闭状态时，A20强制置0，此时实际寻址范围为0h-fffffh。但当A20处于打开状态，A20可以接受来自A19的进位，此时实际寻址范围为0h-10ffefh
 
 1. GDT表项全局描述符表格式：(大端序要反转)
+   <img src="./pictures/gdt.png"/>
    <https://blog.csdn.net/qq_43098197/article/details/127161848>
 
-   IDT表项中断门、GDT任务门、调用门、陷阱门
+   IDT表项中断门、调用门、陷阱门
    <https://zhuanlan.zhihu.com/p/400007642>
+   
+   GDT任务门(tss描述符)(32位tss段)
+   <https://blog.csdn.net/chen1540524015/article/details/74075252>
 
 2. 在保护模式下，CS寄存器不能直接通过MOV指令进行操作。
    在保护模式下，要修改CS寄存器的值，需要使用特殊的指令，如LJMP（长跳转）或LRET（长返回）。这些指令会将新的代码段选择子加载到CS寄存器中，并跳转到指定的地址。
@@ -110,16 +114,7 @@ CPU通过IO端口直接与这个芯片进行通信，对应的IO端口为0x60。
 6. C语言里规定：16bit程序中，返回值保存在ax寄存器中，32bit程序中，返回值保持在eax寄存器中，如果是64bit返回值，edx寄存器保存高32bit，eax寄存器保存低32bit。
 
 7. 任务状态段基本格式
-   |结构成员|占用类型|
-   |:-----:|:-------:|
-   |上一任务链接backlink|int|
-   |esp0,ss0,esp1,ss1,esp2,ss2|int|
-   |gr3(pdbr)|int|
-   |eip,eflags|int|
-   |eax,ecx,edx,ebx,esp,ebp,esi,edi|int|
-   |es,cs,ss,ds,fs,gs|int|
-   |LDT选择子ldtr|int|
-   |I/O位图基质iomap|int
+   <img src="./pictures/tss_segment.png"/>
 在TSS偏移102字节处有一个单字被称为“I/O位图基址”（它的值定义为当前地址-TSS基址+2），指向的便是I/O许可位图，之所以称之为位图，是因为它的每一位表示一个字节的端口地址是否可用。如果某一位为0，则表示此位对应的端口号可用，为1则不可用。每一个任务都可以有单独的TSS，故每一个任务可以有它单独的I/O许可位图。I/O许可位图必须以0FFh结尾。如果I/O位图基址大于或等于TSS段界限，就表示没有I/O许可位图，如果CPL>=IOPL（IO特权级，位于寄存器eflags的第13位），则所有I/O指令都会引起异常。I/O许可位图的使用使得即便在同一特权级下不同的任务也可以有不同的I/O访问权限。
 
 关于I/O许可位图用法，可见下例：
