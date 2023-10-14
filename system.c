@@ -2,7 +2,7 @@
 //系统函数
 /**
  * @brief Set the gdt segment object
- * 
+ * change gs directly without return
  * @param gs 表项开始地址
  * @param limit 段界限
  * @param base 段基址
@@ -52,9 +52,7 @@ void set_idt_segment(struct IDT_INTGATE* ii, unsigned int offset,unsigned int se
 	ii->offset_high = (offset>>16)&0xffff;
 	return;
 }
-void set_tss_segment(struct GDT_GATE){
-	
-}
+
 void wait_kbc_ready(){
 	while(1)
 	{
@@ -274,4 +272,7 @@ void inthandler2ch(int* esp){
 void inthandler27h(int* esp){
 	io_out8(PIC0_OCW2,0X67);
 	return;
+}
+void switch_task_test(){
+	
 }

@@ -81,6 +81,9 @@ _load_idt:; void load_idt(int limit,int addr)
 	mov [esp+6],ax
 	lidt [esp+6]
 	ret
+_load_tr:; void load_tr(int tr)
+	ltr [esp+4]
+	ret
 _asm_inthandler20h: ;void asm_inthandler20h()
 	push es
 	push ds
@@ -141,7 +144,9 @@ _asm_inthandler2ch:;void asm_inthandler2ch()
 	pop ds
 	pop es
 	iretd
-
+_taskchange: ;void taskchange(int eip,int cs) == farjump
+	jmp far [esp+4]
+	ret
 	
 _WORDS: ;0x00-0x7f 128words 
 	DB 0x3C,0x52,0x91,0x91,0x91,0x9D,0x81,0x42,0x3C,0x00,0x00,0xDB,0xDB,0x00,0x00,0x00, ;加载/等待指针（圆圈）

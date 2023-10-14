@@ -111,5 +111,47 @@ int init_multipc(){
 	init_simlist(&(multipc.PD));
 	init_simlist(&(multipc.PZ));
 	init_simlist(&(multipc.PN));
+	return 1;
+}
+/**
+ * @brief 将tss初始化成全0
+ * 
+ * @param tss 
+ */
+void init_TSS(struct TSS* tss){
+	for(int i=0;i<26;i++,(int*)tss++)
+		*(int*)tss=0;
+	return;
+}
+/**
+ * @brief 注册任务
+ * 
+ * 
+ * @param gs 段号
+ * @param base tss基址
+ * @param limit 限长
+ * @param settings 设置
+ * @param funcaddr 任务地址
+ * @return 失败返回-1，成功返回进程pid
+ * @note 目前默认代码段cs:2<<3 地址0x101000；
+ * @note 目前默认数据段及其他初代码段1<<3 地址0x0
+ * @note 自动分配16k栈空间
+ * @todo 搜索是否能分配任务结构体，填写相应结构体描述，返回pid
+ */
+int regtask(struct GDT_SEG* gs,struct TSS* base,unsigned int limit,unsigned int settings,int funcaddr){
+	init_TSS(base);
+	base->es = 1<<3;
+	base->cs = 2<<3;
+	base->ss = 1<<3;
+	base->ds = 1<<3;
+	base->fs = 1<<3;
+	base->gs = 1<<3;
+	base->eip = funcaddr-0x101000;
+	base->eflags=0x00000202;
+	//分配栈，注意eps指向栈底
+	void * stack = mem_malloc(16*1024);
+	if(stack) base->esp = stack+16*1024;
+	else return -1;
+	set_gdt_segment(gs,limit,base,settings,0);
 	
 }

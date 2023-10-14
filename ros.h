@@ -34,6 +34,7 @@
 #define AR_DATA32_RW	0x4092
 #define AR_CODE32_ER	0x409a
 #define AR_INTGATE32	0x8e00
+#define AR_TSS32		0x0089
 #define MAX_SHEETS		32
 #define MAX_WINDOWS		10
 #define MAX_TIMER		256
@@ -104,6 +105,7 @@ struct sheet_ctrl{
 };
 
 struct TSS{
+	int backlink;
 	int esp0,ss0,esp1,ss1,esp2,ss2;
 	int gr3;
 	int eip,eflags;
@@ -125,6 +127,8 @@ unsigned short io_in16(int port);
 unsigned int io_in32(int port);
 void load_gdt(int limit,int addr);
 void load_idt(int limit,int addr);
+void load_tr(int tr);
+void taskchange(int eip,int cs);//farjump
 void asm_inthandler20h();
 void asm_inthandler21h();
 void asm_inthandler27h();
@@ -249,14 +253,13 @@ int timer_reset(int tid,unsigned int timeout,int flags,int data);
 int timer_toc();
 
 struct prograss{
-	int cs;
 	int statu;
 	int flags;
 	int parent;
 	int pid;
 	int level;
-	int tss;
-	int reserve[249];
+	struct TSS tss;
+	int reserve[225];
 };
 struct prograss_ctrl{
 	int stt_tid;			//switch task timer tid
@@ -279,4 +282,6 @@ unsigned char tm_buffer[128];
 unsigned char s[20];
 unsigned char* screen;
 struct SHEET* *screen_buf;
+void init_TSS(struct TSS* tss);
+int regtask(struct GDT_SEG*gs,struct TSS* base,unsigned int limit,unsigned int settings,int funcaddr);
 #endif
