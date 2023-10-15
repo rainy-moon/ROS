@@ -38,8 +38,14 @@
 #define MAX_SHEETS		32
 #define MAX_WINDOWS		10
 #define MAX_TIMER		256
+#define MAX_PROCESS		32
 #define SHADOW_PIX		6
+#define SWITCH_TASK_INTERVEL 	100
+#define SWITCH_TASK_DARA 		1
 #define NULL  			0
+//多任务状态定义
+#define RUNNING			1
+#define RUNABLE			2
 struct window
 {
 	//窗体名字不超过19字符
@@ -194,7 +200,7 @@ void enable_mouse();
 void get_timer_input();
 void get_keyboard_input();
 int get_mouse_input(int ms_state);
-
+void switch_task_test();
 //memory.c 系统内存分配函数
 int memcheck(int addrs,int addre);
 void update_page_ctrl(int size,int start,int mode);
@@ -260,7 +266,7 @@ struct prograss{
 	int level;
 	struct TSS tss;
 	int reserve[225];
-};
+}prograsses[MAX_PROCESS];
 struct prograss_ctrl{
 	int stt_tid;			//switch task timer tid
 	struct prograss *PC; 	//当前进行进程

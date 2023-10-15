@@ -105,7 +105,12 @@ int timer_toc(){
 }
 
 int init_multipc(){
-	multipc.stt_tid = timer_malloc(2,0,1);
+	prograsses[0].pid = 1;
+	prograsses[0].tss.iomap=0x40000000;
+	prograsses[0].tss.ldtr=0;
+	prograsses[0].statu = RUNNING;
+	multipc.stt_tid = timer_malloc(SWITCH_TASK_INTERVEL,0,SWITCH_TASK_DARA);
+	multipc.PC = prograsses;
 	init_simlist(&(multipc.PR));
 	init_simlist(&(multipc.PS));
 	init_simlist(&(multipc.PD));
@@ -150,8 +155,8 @@ int regtask(struct GDT_SEG* gs,struct TSS* base,unsigned int limit,unsigned int 
 	base->eflags=0x00000202;
 	//分配栈，注意eps指向栈底
 	void * stack = mem_malloc(16*1024);
-	if(stack) base->esp = stack+16*1024;
+	if(stack) base->esp = (int)stack+16*1024;
 	else return -1;
-	set_gdt_segment(gs,limit,base,settings,0);
+	set_gdt_segment(gs,limit,(unsigned int)base,settings,0);
 	
 }

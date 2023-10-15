@@ -44,6 +44,9 @@ void MAIN(){
 	screen = *tp;
 	init_screen_buf();
 	//显示鼠标
+	mouse.x=0;mouse.y=0;
+	mouse.ms_state=0;
+	mouse.posx = 160;mouse.posy=100;
 	mouse_create();
 	//桌面图层
 	win_create("ROS_desktop",0,0,sc->maxx,sc->maxy,sc->top,6,0);
@@ -51,13 +54,14 @@ void MAIN(){
 	win_create("debug",200,100,500,400,sc->top,0,1);
 	//初始化计时器
 	init_timerctrl();
-
-	mouse.x=0;mouse.y=0;
-	mouse.ms_state=0;
-	mouse.posx = 160;mouse.posy=100;
+	//
+	my_sprintf(s,"taskb:%d",&switch_task_test);
+	win_showsln(2,s,COLOR_BLACK);
+	
 	//加入10s计时器
 	timer_malloc(1000,0,34);
 
+	//
 	while(1) {
 		time_count++;
 		// int length = g_shows(sc->sheets[windows[2].sheet_index].buf,s,windows[2].cursor_x,windows[2].cursor_y,COLOR_BLACK,windows[2].width);

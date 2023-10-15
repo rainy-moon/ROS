@@ -215,6 +215,11 @@ int get_mouse_input(int ms_state){
 	}
 	return ms_state;	
 }
+/**
+ * @brief Get the timer input object
+ * @note 34 10s计时
+ * @note 1 任务切换。目前只实现两个任务的简单切换
+ */
 void get_timer_input(){
 	if(io_buffer_num(&tm_buffer_ctrl)){
 		int data = io_buffer_pop(&tm_buffer_ctrl);
@@ -224,6 +229,9 @@ void get_timer_input(){
 				win_showsln(2,s,COLOR_BLACK);
 				time_count = 0;
 				break;
+			case SWITCH_TASK_DARA:
+				
+
 		}
 	}
 	return;
@@ -274,5 +282,8 @@ void inthandler27h(int* esp){
 	return;
 }
 void switch_task_test(){
-	
+	win_showsln(2,"task b run",COLOR_LIGHT_GREEN);
+	for(;;){
+		hlt();
+	}
 }
