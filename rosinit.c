@@ -4,8 +4,7 @@
 //存放软盘2e0处
 void MAIN(){
 	//重新初始化全局描述符表和中断描述符表
-	struct GDT_SEG* gs  = (struct GDT_SEG*)0x00500000;
-	struct IDT_INTGATE* ii = (struct IDT_INTGATE*)0x00510000;
+
 	for(int i = 0;i<8192;i++)
 		set_gdt_segment(gs+i,0,0,0,0);
 	for(int i = 0;i<256;i++)
@@ -28,7 +27,7 @@ void MAIN(){
 	//初始化鼠标
 	init_keyboard();
 	enable_mouse();
-	sti();
+	
 	//开中断
 	io_out8(PIC0_IMR, 0xf8); 
 	io_out8(PIC1_IMR, 0xef);
@@ -54,23 +53,26 @@ void MAIN(){
 	win_create("debug",200,100,500,400,sc->top,0,1);
 	//初始化计时器
 	init_timerctrl();
+	//初始化多任务控制器
+	init_multipc_ctrl();
+
 	//
-	my_sprintf(s,"taskb:%d",&switch_task_test);
+	my_sprintf(s,"taskb:%d",(int)&switch_task_test);
 	win_showsln(2,s,COLOR_BLACK);
-	
+	int pid = create_task((int)&switch_task_test,0,0);
+	if(pid) regtask(gs+4,pid,103,AR_TSS32);
 	//加入10s计时器
 	timer_malloc(1000,0,34);
 
-	//
+	//打开中断
+	sti();
 	while(1) {
 		time_count++;
 		// int length = g_shows(sc->sheets[windows[2].sheet_index].buf,s,windows[2].cursor_x,windows[2].cursor_y,COLOR_BLACK,windows[2].width);
 		// sheet_refresh(windows[2].sheet_index,windows[2].cursor_x,windows[2].cursor_y,length*8,16);
-		cli();
 		get_timer_input();
 		get_keyboard_input();
 		mouse.ms_state = get_mouse_input(mouse.ms_state);
-		sti();
 	}
 	return;
 }

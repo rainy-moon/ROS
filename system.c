@@ -133,10 +133,20 @@ int io_buffer_pop(struct io_buffer* buffer){
 	return (int)data;
 }
 int io_buffer_num(struct io_buffer* buffer){
-	if(buffer->p<buffer->q)
-		return buffer->p+buffer->size-buffer->q;
-	else if (buffer->p==buffer->q && !(buffer->flags & 0x1)) return buffer->size;
-	else return buffer->p-buffer->q;
+	cli();
+	if(buffer->p<buffer->q){
+		int temp = buffer->p+buffer->size-buffer->q;
+		sti();
+		return temp;
+	}
+	else if (buffer->p==buffer->q && !(buffer->flags & 0x1)){
+		sti();
+		return buffer->size;
+	}
+	else{
+		sti();
+		return buffer->p-buffer->q;
+	}
 }
 
 void get_keyboard_input(){
@@ -229,7 +239,6 @@ void get_timer_input(){
 				win_showsln(2,s,COLOR_BLACK);
 				time_count = 0;
 				break;
-			case SWITCH_TASK_DARA:
 				
 
 		}
@@ -282,8 +291,8 @@ void inthandler27h(int* esp){
 	return;
 }
 void switch_task_test(){
-	win_showsln(2,"task b run",COLOR_LIGHT_GREEN);
 	for(;;){
+		win_showsln(2,"task b run",COLOR_LIGHT_GREEN);
 		hlt();
 	}
 }

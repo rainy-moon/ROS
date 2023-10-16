@@ -2,6 +2,7 @@
 global _hlt
 global _cli
 global _sti
+global _stihlt
 global _io_out8
 global _io_out16
 global _io_out32
@@ -10,12 +11,13 @@ global _io_in16
 global _io_in32
 global _load_gdt
 global _load_idt
+global _load_tr
 global _WORDS
 global _asm_inthandler20h
 global _asm_inthandler21h
 global _asm_inthandler27h
 global _asm_inthandler2ch
-global _stihlt
+global _taskchange
 extern _inthandler20h
 extern _inthandler21h
 extern _inthandler27h

@@ -45,7 +45,11 @@
 #define NULL  			0
 //多任务状态定义
 #define RUNNING			1
+#define PC				1	
 #define RUNABLE			2
+#define PR				2
+#define NEWC			3
+#define PN				3
 struct window
 {
 	//窗体名字不超过19字符
@@ -140,7 +144,6 @@ void asm_inthandler21h();
 void asm_inthandler27h();
 void asm_inthandler2ch();
 void stihlt();
-
 //graphAfont.c 图像画面操作函数
 
 void init_color_plate();
@@ -269,14 +272,22 @@ struct prograss{
 }prograsses[MAX_PROCESS];
 struct prograss_ctrl{
 	int stt_tid;			//switch task timer tid
-	struct prograss *PC; 	//当前进行进程
-	struct SIMLIST PR;		//就绪进程链表
-	struct SIMLIST PS;		//中断挂起链表
-	struct SIMLIST PD;		//不可中断挂起链表
-	struct SIMLIST PZ;		//僵尸进程链表
-	struct SIMLIST PN;		//创建或等待就绪链表
-}multipc;
+	int total_prograsses;
+	struct prograss *pc; 	//当前进行进程
+	struct SIMLIST pr;		//就绪进程链表
+	struct SIMLIST ps;		//中断挂起链表
+	struct SIMLIST pd;		//不可中断挂起链表
+	struct SIMLIST pz;		//僵尸进程链表
+	struct SIMLIST pn;		//创建或等待就绪链表
+}multipc_ctrl;
+void init_TSS(struct TSS* tss);
+int create_task(int funcaddr,int level,int flags);
+void regtask(struct GDT_SEG* gs,int pid,unsigned int limit,unsigned int settings);
+int init_multipc_ctrl();
+
 //全局量
+	struct GDT_SEG* gs  = (struct GDT_SEG*)0x00500000;
+	struct IDT_INTGATE* ii = (struct IDT_INTGATE*)0x00510000;
 int time_count = 0;
 struct io_buffer kb_buffer_ctrl;
 struct io_buffer ms_buffer_ctrl;
@@ -288,6 +299,5 @@ unsigned char tm_buffer[128];
 unsigned char s[20];
 unsigned char* screen;
 struct SHEET* *screen_buf;
-void init_TSS(struct TSS* tss);
-int regtask(struct GDT_SEG*gs,struct TSS* base,unsigned int limit,unsigned int settings,int funcaddr);
+
 #endif
