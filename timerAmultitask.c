@@ -99,16 +99,17 @@ int timer_toc(){
 		int time = ((struct timer*)tc.timelist.head)->time;
 		int flags = ((struct timer*)tc.timelist.head)->flags;
 		int data = ((struct timer*)tc.timelist.head)->data;
-		return (timer_delete(((struct timer*)tc.timelist.head)->tid) && timer_malloc(time,flags,data));
+		if(!(timer_delete(((struct timer*)tc.timelist.head)->tid) && timer_malloc(time,flags,data)))
+			return 0;
 	}
-	else return timer_delete(((struct timer*)tc.timelist.head)->tid);
+	else if(!timer_delete(((struct timer*)tc.timelist.head)->tid)) return 0;
 	if(temp == SWITCH_TASK_DARA && multipc_ctrl.total_prograsses>1){
 		//权宜之计，只有两个任务，后续要实现就绪队列选择
 		int t = (multipc_ctrl.pc->pid%2);
-		multipc_ctrl.pc = &prograsses[t];
-		taskchange(0,(t+3)<<3);
+		return t+3;
 	}else{
 		io_buffer_push(&tm_buffer_ctrl,(((struct timer*)(tc.timelist.head))->data));
+		return 1;
 	}
 }
 

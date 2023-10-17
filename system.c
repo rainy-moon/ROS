@@ -256,8 +256,21 @@ void inthandler20h(int* esp){
 	 * @todo 时钟中断处理
 	 */
 	tc.time++;
-	if(((struct timer*)tc.timelist.head)->timeout<=tc.time)
-		timer_toc();
+	int task = 0;
+	struct timer* t = (struct timer*)tc.timelist.head;
+	while(1){
+		if(t->timeout<=tc.time){
+			task = timer_toc();
+			my_sprintf(s,"20h:%d %d",task,t->timeout);
+			win_showsln(2,s,COLOR_BLACK);
+			t = (struct timer*)tc.timelist.head;
+		}
+		else break;
+	}
+	if(task>2){
+		// multipc_ctrl.pc = &prograsses[task];
+		// taskchange(0,(task+3)<<3);
+	}
 	return;
 }
 /**
