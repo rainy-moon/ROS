@@ -36,27 +36,6 @@ void my_itos(char* s, int data) {
 	return;
 }
 
-// void my_sprintf(char* s,const char*ss,int data){
-// 	const char* sstemp = ss;
-// 	char* stemp = s;
-// 	while (*sstemp != '\0') {
-// 		if (*sstemp != '%') *(stemp++) = *(sstemp++);
-// 		else {
-// 			sstemp++;
-// 			char concats[20];
-// 			switch (*sstemp) {
-// 				case 'd':
-// 					my_itos(concats,data);
-// 					break;
-// 			}
-// 			for (int i=0; concats[i]; i++, stemp++)
-// 				*stemp = concats[i];
-// 			sstemp++;
-// 		}
-// 	}
-// 	*stemp = '\0';
-// 	return;
-// }
 
 void my_sprintf(char* s, const char* ss, ...) {
 	const char* sstemp = ss;

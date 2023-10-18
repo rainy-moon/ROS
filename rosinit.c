@@ -57,8 +57,7 @@ void MAIN(){
 	init_multipc_ctrl();
 
 	//
-	my_sprintf(s,"taskb:%d",(int)&switch_task_test);
-	win_showsln(2,s,COLOR_BLACK);
+	
 	int pid = create_task((int)&switch_task_test,0,0);
 	if(pid) regtask(gs+4,pid,103,AR_TSS32);
 	//加入10s计时器

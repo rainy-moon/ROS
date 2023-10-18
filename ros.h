@@ -40,7 +40,7 @@
 #define MAX_TIMER		256
 #define MAX_PROCESS		32
 #define SHADOW_PIX		6
-#define SWITCH_TASK_INTERVEL 	100
+#define SWITCH_TASK_INTERVEL 	2
 #define SWITCH_TASK_DARA 		1
 #define NULL  			0
 //多任务状态定义
@@ -129,6 +129,9 @@ struct TSS{
 void hlt();
 void sti();
 void cli();
+void stihlt();
+int store_eflags();
+void load_eflags(int eflags);
 void io_out8(int port,int data);
 void io_out16(int port,int data);
 void io_out32(int port,int data);
@@ -143,7 +146,7 @@ void asm_inthandler20h();
 void asm_inthandler21h();
 void asm_inthandler27h();
 void asm_inthandler2ch();
-void stihlt();
+
 //graphAfont.c 图像画面操作函数
 
 void init_color_plate();
@@ -286,8 +289,8 @@ void regtask(struct GDT_SEG* gs,int pid,unsigned int limit,unsigned int settings
 int init_multipc_ctrl();
 
 //全局量
-	struct GDT_SEG* gs  = (struct GDT_SEG*)0x00500000;
-	struct IDT_INTGATE* ii = (struct IDT_INTGATE*)0x00510000;
+struct GDT_SEG* gs  = (struct GDT_SEG*)0x00500000;
+struct IDT_INTGATE* ii = (struct IDT_INTGATE*)0x00510000;
 int time_count = 0;
 struct io_buffer kb_buffer_ctrl;
 struct io_buffer ms_buffer_ctrl;

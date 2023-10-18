@@ -89,6 +89,7 @@ void init_PIC(){
 	io_out8(PIC1_IMR,0xff);
 	return;
 }
+//计时器中断
 void init_PIT(){
 	io_out8(0x43,0x34);
 	io_out8(0x40,0x9c);
@@ -105,46 +106,49 @@ void init_io_buffer(struct io_buffer* iobuf,int size,unsigned char* buffer){
 }
 //可能要考虑中断做成临界区？
 int io_buffer_push(struct io_buffer* buffer,unsigned char data){
+	int e = store_eflags();
 	cli();
 	if(buffer->p==buffer->q && !(buffer->flags & 0x1)){
 		buffer->flags |= 0x2;
-		sti();
+		load_eflags(e);
 		return -1;
 	}
 	buffer->buffer[buffer->p] = data;
 	buffer->p = (buffer->p+1)%buffer->size;
 	if(buffer->p==buffer->q)
 		buffer->flags &= 0xfe;
-	sti();
+	load_eflags(e);
 	return 0;
 }
 //可能要考虑中断做成临界区？
 int io_buffer_pop(struct io_buffer* buffer){
+	int e = store_eflags();
 	cli();
 	if(buffer->p==buffer->q && (buffer->flags & 0x1))
 	{
-		sti();
+		load_eflags(e);
 		return -1;//
 	}
 	unsigned char data = buffer->buffer[buffer->q];
 	buffer->q = (buffer->q+1)%buffer->size;
 	buffer->flags |= 0x01;
-	sti();
+	load_eflags(e);
 	return (int)data;
 }
 int io_buffer_num(struct io_buffer* buffer){
+	int e = store_eflags();
 	cli();
 	if(buffer->p<buffer->q){
 		int temp = buffer->p+buffer->size-buffer->q;
-		sti();
+		load_eflags(e);
 		return temp;
 	}
 	else if (buffer->p==buffer->q && !(buffer->flags & 0x1)){
-		sti();
+		load_eflags(e);
 		return buffer->size;
 	}
 	else{
-		sti();
+		load_eflags(e);
 		return buffer->p-buffer->q;
 	}
 }
@@ -239,8 +243,6 @@ void get_timer_input(){
 				win_showsln(2,s,COLOR_BLACK);
 				time_count = 0;
 				break;
-				
-
 		}
 	}
 	return;
@@ -260,16 +262,17 @@ void inthandler20h(int* esp){
 	struct timer* t = (struct timer*)tc.timelist.head;
 	while(1){
 		if(t->timeout<=tc.time){
-			task = timer_toc();
-			my_sprintf(s,"20h:%d %d",task,t->timeout);
-			win_showsln(2,s,COLOR_BLACK);
+			int res = timer_toc();
+			if(task<=2&&res>2) task = res;
+			// my_sprintf(s,"20h:%d %d",res,t->timeout);
+			// win_showsln(2,s,COLOR_BLACK);
 			t = (struct timer*)tc.timelist.head;
 		}
 		else break;
 	}
 	if(task>2){
-		// multipc_ctrl.pc = &prograsses[task];
-		// taskchange(0,(task+3)<<3);
+		multipc_ctrl.pc = &prograsses[task-3];
+		taskchange(0,task<<3);
 	}
 	return;
 }
@@ -305,7 +308,8 @@ void inthandler27h(int* esp){
 }
 void switch_task_test(){
 	for(;;){
-		win_showsln(2,"task b run",COLOR_LIGHT_GREEN);
+		my_sprintf(s,"b run%d",tc.time);
+		win_showslr(1,s,COLOR_LIGHT_GREEN);
 		hlt();
 	}
 }

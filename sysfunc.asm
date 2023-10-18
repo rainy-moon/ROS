@@ -3,6 +3,8 @@ global _hlt
 global _cli
 global _sti
 global _stihlt
+global _store_eflags
+global _load_eflags
 global _io_out8
 global _io_out16
 global _io_out32
@@ -39,6 +41,16 @@ _stihlt: ;void stihlt()
 	sti
 	hlt
 	ret
+_store_eflags:;int store_eflags()
+	pushfd
+	pop eax
+	ret
+_load_eflags:;void load_eflags(int eflags)
+	mov eax,[esp+4]
+	push eax
+	popfd
+	ret
+
 _io_out8: ; void io_out8(int port, int data)
 	mov edx,[esp+4]
 	mov eax,[esp+8]

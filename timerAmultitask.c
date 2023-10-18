@@ -108,7 +108,7 @@ int timer_toc(){
 		int t = (multipc_ctrl.pc->pid%2);
 		return t+3;
 	}else{
-		io_buffer_push(&tm_buffer_ctrl,(((struct timer*)(tc.timelist.head))->data));
+		if(temp != SWITCH_TASK_DARA) io_buffer_push(&tm_buffer_ctrl,temp);
 		return 1;
 	}
 }
