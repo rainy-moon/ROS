@@ -18,7 +18,7 @@ sysfunc.o: sysfunc.asm Makefile
 	$(NASM) -f elf32 sysfunc.asm -o sysfunc.o
 
 rosinit.o: rosinit.c Makefile
-	gcc -o rosinit.o -c rosinit.c
+	gcc -o rosinit.o -c rosinit.c -I h_files
 
 sysinit.bin: rosinit.o sysfunc.o Makefile
 

@@ -96,157 +96,10 @@ void init_PIT(){
 	io_out8(0x40,0x2e);
 	return;
 }
-void init_io_buffer(struct io_buffer* iobuf,int size,unsigned char* buffer){
-	iobuf->p = 0;
-	iobuf->q = 0;
-	iobuf->flags = 0x1;
-	iobuf->size = size;
-	iobuf->buffer = buffer;
-	return ;
-}
-//可能要考虑中断做成临界区？
-int io_buffer_push(struct io_buffer* buffer,unsigned char data){
-	int e = store_eflags();
-	cli();
-	if(buffer->p==buffer->q && !(buffer->flags & 0x1)){
-		buffer->flags |= 0x2;
-		load_eflags(e);
-		return -1;
-	}
-	buffer->buffer[buffer->p] = data;
-	buffer->p = (buffer->p+1)%buffer->size;
-	if(buffer->p==buffer->q)
-		buffer->flags &= 0xfe;
-	load_eflags(e);
-	return 0;
-}
-//可能要考虑中断做成临界区？
-int io_buffer_pop(struct io_buffer* buffer){
-	int e = store_eflags();
-	cli();
-	if(buffer->p==buffer->q && (buffer->flags & 0x1))
-	{
-		load_eflags(e);
-		return -1;//
-	}
-	unsigned char data = buffer->buffer[buffer->q];
-	buffer->q = (buffer->q+1)%buffer->size;
-	buffer->flags |= 0x01;
-	load_eflags(e);
-	return (int)data;
-}
-int io_buffer_num(struct io_buffer* buffer){
-	int e = store_eflags();
-	cli();
-	if(buffer->p<buffer->q){
-		int temp = buffer->p+buffer->size-buffer->q;
-		load_eflags(e);
-		return temp;
-	}
-	else if (buffer->p==buffer->q && !(buffer->flags & 0x1)){
-		load_eflags(e);
-		return buffer->size;
-	}
-	else{
-		load_eflags(e);
-		return buffer->p-buffer->q;
-	}
-}
 
-void get_keyboard_input(){
-	if(io_buffer_num(&kb_buffer_ctrl)) {
-		int data = io_buffer_pop(&kb_buffer_ctrl);
-		if(data!=-1){
-			my_sprintf(s,"kb_num : %d",data);
-			win_showsln(1,s,7);
-		}
-	}
-	return;
-}
 
-void mouse_decode(){
-	mouse.btn = mouse.mouse_state[0] & 0x07;
-	mouse.x = mouse.mouse_state[1];
-	mouse.y = mouse.mouse_state[2];
-	if(mouse.x && mouse.mouse_state[0] & 0x10)
-		mouse.x |= 0xffffff00;
-	if(mouse.y && mouse.mouse_state[0] & 0x20)
-		mouse.y |= 0xffffff00;
-	mouse.y = -mouse.y;
-	//打印字符和更新鼠标，可能以后要转移到图层控制模块
-	
-	mouse.posx=(mouse.posx+mouse.x);
-	mouse.posy=(mouse.posy+mouse.y);
-	if(mouse.posx<0) mouse.posx=0;
-	if(mouse.posx>=sc->maxx) mouse.posx=sc->maxx-1;
-	if(mouse.posy<0) mouse.posy=0;
-	if(mouse.posy>=sc->maxy) mouse.posy=sc->maxy-1;
-	sheet_slide(mouse.posx,mouse.posy,windows[mouse.hwnd].sheet_index);
-}
 
-int get_mouse_input(int ms_state){
-	switch (ms_state){
-		case 0:
-			if(io_buffer_num(&ms_buffer_ctrl)){
-				int data = io_buffer_pop(&ms_buffer_ctrl);
-				if(data!=-1){
-					ms_state = 1;
-				}
-				else break;
-			}
-			else break;
-		case 1:
-			if(io_buffer_num(&ms_buffer_ctrl)){
-				int data = io_buffer_pop(&ms_buffer_ctrl);
-				if(data!=-1 && (data & 0xc8)==0x8){
-					mouse.mouse_state[0]=(unsigned char)data;
-					ms_state = 2;
-				}
-				else break;
-			}
-			else break;
-		case 2:
-			if(io_buffer_num(&ms_buffer_ctrl)){
-				int data = io_buffer_pop(&ms_buffer_ctrl);
-				if(data!=-1){
-					mouse.mouse_state[1]=(unsigned char)data;
-					ms_state = 3;
-				}
-				else break;
-			}
-			else break;
-		case 3:
-			if(io_buffer_num(&ms_buffer_ctrl)){
-				int data = io_buffer_pop(&ms_buffer_ctrl);
-				if(data!=-1){
-					mouse.mouse_state[2]=(unsigned char)data;
-					ms_state = 1;
-					mouse_decode();
-				}
-				else break;
-			}
-			else break;
-	}
-	return ms_state;	
-}
-/**
- * @brief Get the timer input object
- * @note 34 10s计时
- * @note 1 任务切换。目前只实现两个任务的简单切换
- */
-void get_timer_input(){
-	if(io_buffer_num(&tm_buffer_ctrl)){
-		int data = io_buffer_pop(&tm_buffer_ctrl);
-		switch(data){
-			case 34:
-				my_sprintf(s,"10sec %d",time_count);
-				win_showsln(2,s,COLOR_BLACK);
-				time_count = 0;
-				break;
-		}
-	}
-	return;
-}
+
 /**
  * @brief 时钟中断程序
  * 
@@ -273,6 +126,7 @@ void inthandler20h(int* esp){
 	if(task>2){
 		multipc_ctrl.pc = &prograsses[task-3];
 		taskchange(0,task<<3);
+
 	}
 	return;
 }

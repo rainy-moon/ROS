@@ -53,5 +53,13 @@
   "spellright.language": [
     "en"
   ],
-  "spellright.documentTypes": []
+  "spellright.documentTypes": [],
+  "files.associations": {
+    "*.asm": "nasm",
+    "*.cjson": "jsonc",
+    "*.wxss": "css",
+    "*.wxs": "javascript",
+    "*.nas": "nasm",
+    "simlist.h": "c"
+  }
 }
