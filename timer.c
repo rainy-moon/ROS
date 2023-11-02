@@ -50,13 +50,8 @@ int timer_malloc(unsigned int time,int flags,int data){
  * @return int 
  */
 int timer_delete(int tid){
-	int index=0;
-	struct timer* t=(struct timer*)(tc.timelist.head);
-	for(;index<tc.num;index++){
-		if(t->tid==tid) break;
-		else t = t->next;
-	}
-	if(index >= tc.num) return 0;
+	int index=simlist_find(&(tc.timelist),tid,3);
+	if(index == -1) return 0;
 	if(!simlist_delete(&(tc.timelist),index)) return 0;
 	tc.num--;
 	return 1;

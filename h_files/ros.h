@@ -39,6 +39,8 @@
 
 #include "timer.h"
 #include "multitask.h"
+//semaphore.c 信号量实现
+#include "semaphore.h"
 void switch_task_test();
 //全局量
 unsigned char s[20];

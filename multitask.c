@@ -16,27 +16,13 @@ int init_multipc_ctrl(){
 	load_tr(3<<3);
 	return 1;
 }
-/**
- * @brief 将tss初始化成全0
- * 
- * @param tss 
- */
+
 void init_TSS(struct TSS* tss){
 	for(int i=0;i<26;i++,(int*)tss++)
 		*(int*)tss=0;
 	return;
 }
-/**
- * @brief 创建任务
- * 
- * @param funcaddr 函数地址
- * @param level 优先级
- * @param flags 标志
- * @return int 失败返回0，成功返回进程pid
- * @note 目前默认代码段cs:2<<3 地址0x101000；
- * @note 目前默认数据段及其他初代码段1<<3 地址0x0
- * @note 自动分配16k栈空间
- */
+
 int create_task(int funcaddr,int level,int flags){
 	int i=0;
 	for(;i<MAX_PROCESS;i++)
@@ -61,21 +47,28 @@ int create_task(int funcaddr,int level,int flags){
 	prograsses[i].pid=i+1;
 	return prograsses[i].pid;
 }
-/**
- * @brief 注册任务
- * 
- * 
- * @param gs 段号
- * @param pid 任务id
- * @param limit 限长
- * @param settings 设置
- * @return 
 
- * @todo 搜索是否能分配任务结构体，填写相应结构体描述，返回pid
- */
 void regtask(struct GDT_SEG* gs,int pid,unsigned int limit,unsigned int settings){
 	set_gdt_segment(gs,limit,(unsigned int)&(prograsses[pid-1].tss),settings,0);
 	prograsses[pid-1].statu = RUNABLE;
 	multipc_ctrl.total_prograsses++;
+	return;
+}
+
+void change_task(){
+	
+	return;
+}
+
+void PSleep(struct prograss* p){
+	int index = simlist_find(&(multipc_ctrl.pr),p->pid,3);
+	if(index==-1) return;
+	else {
+		simlist_delete(&(multipc_ctrl.pr),index);
+		simlist_sortedinsert(&(multipc_ctrl.ps),(struct node*)(prograsses+p->pid-1),4);
+		if(p==multipc_ctrl.pc){
+			
+		}
+	}
 	return;
 }
