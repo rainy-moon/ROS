@@ -13,6 +13,7 @@ int init_multipc_ctrl(){
 	multipc_ctrl.pc = prograsses;
 	multipc_ctrl.stt_tid = timer_malloc(SWITCH_TASK_INTERVEL,0,SWITCH_TASK_DARA);
 	regtask(1,103,AR_TSS32);
+	load_tr(3<<3);
 	return 1;
 }
 
@@ -49,7 +50,6 @@ int create_task(int funcaddr,int level,int flags){
 
 void regtask(int pid,unsigned int limit,unsigned int settings){
 	set_gdt_segment(gs+pid+2,limit,(unsigned int)&(prograsses[pid-1].tss),settings,0);
-	load_tr((pid+2)<<3);
 	prograsses[pid-1].statu = RUNABLE;
 	simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)(prograsses+pid-1),4);
 	multipc_ctrl.total_prograsses++;
@@ -60,7 +60,7 @@ void change_task(int pid){
 	//重置20ms切换计时器?
 	//将当前进程转换成
 	multipc_ctrl.pc = &prograsses[pid-1];
-	taskchange(0,pid+2);
+	taskchange(0,(pid+2)<<3);
 	return;
 }
 

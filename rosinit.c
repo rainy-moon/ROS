@@ -67,8 +67,6 @@ void MAIN(){
 	sti();
 	while(1) {
 		time_count++;
-		// int length = g_shows(sc->sheets[windows[2].sheet_index].buf,s,windows[2].cursor_x,windows[2].cursor_y,COLOR_BLACK,windows[2].width);
-		// sheet_refresh(windows[2].sheet_index,windows[2].cursor_x,windows[2].cursor_y,length*8,16);
 		get_timer_input();
 		get_keyboard_input();
 		mouse.ms_state = get_mouse_input(mouse.ms_state);
