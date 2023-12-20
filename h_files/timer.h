@@ -27,7 +27,7 @@ struct timer{
 };
 
 // global define
-int time_count = 0;
+unsigned int time_count = 0;
 
 // function define
 int init_timerctrl();

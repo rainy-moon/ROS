@@ -2,7 +2,7 @@
 #define _PROGRASSH_
 #include "ros.h"
 #define MAX_PROCESS				32
-#define SWITCH_TASK_INTERVEL 	500
+#define SWITCH_TASK_INTERVEL 	1
 #define SWITCH_TASK_DARA 		1
 #define RUNNING			1
 #define PC				1	

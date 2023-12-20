@@ -56,20 +56,28 @@ void MAIN(){
 	//初始化多任务控制器
 	init_multipc_ctrl();
 
+	//初始化信号量sem1
+	sem1 = init_sem(1,"timeSem");
 	//
-	
-	int pid = create_task((int)&switch_task_test,0,0);
-	if(pid) regtask(pid,103,AR_TSS32);
+	int pid_1 = create_task((int)&SwitchTaskTest,0,0);
+	if(pid_1) regtask(pid_1,103,AR_TSS32);
+	int pid_2 = create_task((int)&TimerInputAction,0,0);
+	if(pid_2) regtask(pid_2,103,AR_TSS32);
+	int pid_3 = create_task((int)&MouseInputAction,0,0);
+	if(pid_3) regtask(pid_3,103,AR_TSS32);
+	int pid_4 = create_task((int)&KeyInputAction,0,0);
+	if(pid_4) regtask(pid_4,103,AR_TSS32);
 	//加入10s计时器
 	timer_malloc(1000,0,34);
 
 	//打开中断
 	sti();
 	while(1) {
+		//semWait(sem1);
+		//cli();
 		time_count++;
-		get_timer_input();
-		get_keyboard_input();
-		mouse.ms_state = get_mouse_input(mouse.ms_state);
+		//sti();
+		//semSignal(sem1);
 	}
 	return;
 }
@@ -85,3 +93,4 @@ void MAIN(){
 #include"get_keyboard_input.c"
 #include"get_mouse_input.c"
 #include"get_timer_input.c"
+#include"semaphore.c"

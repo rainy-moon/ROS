@@ -9,9 +9,11 @@ void get_timer_input(){
 		int data = io_buffer_pop(&tm_buffer_ctrl);
 		switch(data){
 			case 34:
+				//semSignal(sem1);
 				my_sprintf(s,"10sec %d",time_count);
 				win_showsln(2,s,COLOR_BLACK);
 				time_count = 0;
+				//semWait(sem1);
 				break;
 		}
 	}

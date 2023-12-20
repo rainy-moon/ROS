@@ -15,7 +15,7 @@ void semWait(struct semaphore* sem){
 	while(sem->value <= 0){
 		simlist_sortedinsert(&(sem->queue),temp,4);
 		sem->value--;
-		PSleep(temp);
+		PSleep((struct prograss*)temp);
 	}
 	mem_free((void *)temp,sizeof(temp));
 	sem->value--;
@@ -29,11 +29,17 @@ void semSignal(struct semaphore* sem){
 	if(sem->queue.size>0){
 		struct node* p = simlist_delete(&(sem->queue),0);
 		sem->value++;
-		PAwake(p);
+		PAwake((struct prograss*)p);
 	}
 	else{
 		sem->value++;
 	}
 	load_eflags(flags);
+	return;
+}
+
+void clear_sem(struct semaphore* sem){
+	simlist_free(&(sem->queue));
+	mem_free((void*)sem,sizeof(struct semaphore));
 	return;
 }

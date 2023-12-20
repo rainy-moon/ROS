@@ -158,10 +158,25 @@ void inthandler27h(int* esp){
 	io_out8(PIC0_OCW2,0X67);
 	return;
 }
-void switch_task_test(){
+void SwitchTaskTest(){
 	for(;;){
 		my_sprintf(s,"b run%d",tc.time);
 		win_showslr(1,s,COLOR_LIGHT_GREEN);
 		hlt();
+	}
+}
+void TimerInputAction(){
+	while(1){
+		get_timer_input();
+	}
+}
+void MouseInputAction(){
+	while(1){
+		mouse.ms_state = get_mouse_input(mouse.ms_state);
+	}
+}
+void KeyInputAction(){
+	while(1){
+		get_keyboard_input();
 	}
 }
