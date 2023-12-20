@@ -13,11 +13,12 @@ int init_timerctrl(){
 	guard->flags = 0;
 	guard->tid = 0x0;
 	guard->data = 0xff;
+	int flag = store_eflags();
 	cli();
 	simlist_sortedinsert(&(tc.timelist),(struct node*)guard,0);
 	tc.num=1;
 	tc.time=0;
-	sti();
+	load_eflags(flag);
 	return 1;
 }
 /**
@@ -36,11 +37,12 @@ int timer_malloc(unsigned int time,int flags,int data){
 	t->data = data;
 	t->time = time;
 	t->tid = tc.num;
+	int flag = store_eflags();
 	cli();
 	t->timeout=time+tc.time;
 	simlist_sortedinsert(&(tc.timelist),(struct node*)t,0);
 	tc.num++;
-	sti();
+	load_eflags(flag);
 	return t->tid;
 }
 /**
@@ -52,7 +54,12 @@ int timer_malloc(unsigned int time,int flags,int data){
 int timer_delete(int tid){
 	int index=simlist_find(&(tc.timelist),tid,3);
 	if(index == -1) return 0;
-	if(!simlist_delete(&(tc.timelist),index)) return 0;
+	int flag = store_eflags();
+	cli();
+	int addr = (int)simlist_delete(&(tc.timelist),index);
+	load_eflags(flag);
+	if(!addr) return 0;
+	else if(!mem_free((void*)addr,sizeof(struct timer))) return 0;
 	tc.num--;
 	return 1;
 }
@@ -76,9 +83,10 @@ int timer_reset(int tid,unsigned int time,int flags,int data){
 	t->flags = flags;
 	t->data = data;
 	t->time = time;
+	int flag = store_eflags();
 	cli();
 	t->timeout = time+tc.time;
-	sti();
+	load_eflags(flag);
 	return 1;
 }
 /**
@@ -98,10 +106,10 @@ int timer_toc(){
 			return 0;
 	}
 	else if(!timer_delete(((struct timer*)tc.timelist.head)->tid)) return 0;
-	if(temp == SWITCH_TASK_DARA && multipc_ctrl.total_prograsses>1){
-		//权宜之计，只有两个任务，后续要实现就绪队列选择
-		int t = (multipc_ctrl.pc->pid%2);
-		return t+3;
+	if(temp == SWITCH_TASK_DARA && multipc_ctrl.pr.size>0){
+		struct prograss* p = (struct prograss*)simlist_delete(&(multipc_ctrl.pr),0);
+		simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)multipc_ctrl.pc,4); 
+		return ((struct prograss*) multipc_ctrl.pr.head)->pid+2;
 	}else{
 		if(temp != SWITCH_TASK_DARA) io_buffer_push(&tm_buffer_ctrl,temp);
 		return 1;

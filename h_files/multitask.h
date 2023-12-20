@@ -73,13 +73,21 @@ int create_task(int funcaddr,int level,int flags);
 
  * @todo 搜索是否能分配任务结构体，填写相应结构体描述，返回pid
  */
-void regtask(struct GDT_SEG* gs,int pid,unsigned int limit,unsigned int settings);
+void regtask(int pid,unsigned int limit,unsigned int settings);
 int init_multipc_ctrl();
 /**
- * @brief 让某进程阻塞，必须在关闭中断时运行
- * 
- * @param p 
+ * @brief 进程切换
+ * @todo 将pc改成待切换进程，执行任务切换函数
+ * @param pid 进程pid
+ */
+void change_task(int pid);
+/**
+ * @brief 
+ *  
+ * @param p 进程控制块地址
+ * @note 此函数在中断关闭下运行
  */
 void PSleep(struct prograss* p);
-void PWAKE(struct prograss* p);
+void PAwake(struct prograss* p);
+
 #endif

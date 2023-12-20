@@ -22,7 +22,7 @@ struct timer{
 	int flags;
 	int tid;
 	int data;
-	int reserve[251];
+	int reserve[250];
 	struct timer* next;
 };
 

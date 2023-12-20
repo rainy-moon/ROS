@@ -59,7 +59,7 @@ void MAIN(){
 	//
 	
 	int pid = create_task((int)&switch_task_test,0,0);
-	if(pid) regtask(gs+4,pid,103,AR_TSS32);
+	if(pid) regtask(pid,103,AR_TSS32);
 	//加入10s计时器
 	timer_malloc(1000,0,34);
 

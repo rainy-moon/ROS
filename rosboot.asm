@@ -190,7 +190,7 @@ dw 0xAA55
 
 ;SYSTEM SECTION
 ;SECTION 2 & OTHERS
-
+;后面部分只是测试是否正常读取，会被覆盖掉
 mov ax,0
 mov es,ax
 mov ax,0x901a

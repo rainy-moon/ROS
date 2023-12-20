@@ -18,7 +18,7 @@ int simlist_insert(struct SIMLIST* sl,int index,struct node*newnode){
 		return 1;
 	}
 	else{
-		while(index--)
+		while(--index)
 			p=p->next;
 		newnode->next=p->next;
 		p->next=newnode;
@@ -27,24 +27,24 @@ int simlist_insert(struct SIMLIST* sl,int index,struct node*newnode){
 	}
 }
 
-int simlist_delete(struct SIMLIST* sl,int index){
+struct node* simlist_delete(struct SIMLIST* sl,int index){
 	if(index>sl->size) return 0;
 	struct node* p = sl->head;
 	//删头
 	if(index==0){
 		sl->head = sl->head->next;
 		sl->size--;
-		if(!mem_free(p,sizeof(struct node))) return 0;
-		return 1;
+		p->next=NULL;
+		return p;
 	}
 	else {
-		while(index--)
+		while(--index)
 			p=p->next;
 		struct node* temp = p->next;
 		p->next = temp->next;
 		sl->size--;
-		if(!mem_free(temp,sizeof(struct node))) return 0;
-		return 1;
+		temp->next=NULL;
+		return temp;
 	}
 }
 
@@ -93,12 +93,24 @@ void simlist_sortedinsert(struct SIMLIST* sl,struct node* newnode,int index){
 }
 
 int simlist_find(struct SIMLIST* sl,int value,int index){
-	int index=0;
+	int i=0;
 	struct node* n = sl->head;
-	for(;index<sl->size;index++){
+	for(;i<sl->size;i++){
 		if(n->val[index]==value) break;
 		else n=n->next;
 	}
-	if(index>=sl->size) return -1;
-	else return index;
+	if(i>=sl->size) return -1;
+	else return i;
+}
+
+struct node* nodecpy(struct node* n){
+	struct node* temp = (struct node*) mem_malloc(sizeof(struct node));
+	if(!temp);
+	else{ 
+		for(int i=0;i<254;i++)
+			temp->val[i] = n->val[i];
+		temp->next = NULL;
+	}
+	return temp;
+	
 }

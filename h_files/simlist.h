@@ -31,15 +31,16 @@ void init_simlist(struct SIMLIST* sl);
  * @param value 
  * @return int
  */
-int simlist_insert(struct SIMLIST* sl,int index,struct node* new);
+int simlist_insert(struct SIMLIST* sl,int index,struct node* newnode);
 /**
  * @brief 删除链表节点
- * 返回0删除失败，成功返回1
+ * 返回删除节点的地址,错误返回0.注意返回的节点地址next指针会指向NULL
  * @param sl 
  * @param index 
- * @return int 
+ * @return struct node* 
+ * @note 切记需要手动释放地址空间，删除节点不会自动释放
  */
-int simlist_delete(struct SIMLIST* sl,int index);
+struct node* simlist_delete(struct SIMLIST* sl,int index);
 /**
  * @brief 返回链表下标对应节点
  * 
@@ -59,7 +60,7 @@ int simlist_free(struct SIMLIST* sl);
  * @brief 维护从小到大链表的插入,稳定排序
  * 
  * @param sl 
- * @param new 
+ * @param newnode
  * @param index 大小比较时使用value值的第几个值（0-254）
  * @return 
  */
@@ -73,4 +74,13 @@ void simlist_sortedinsert(struct SIMLIST* sl,struct node* newnode,int index);
  * @return int 
  */
 int simlist_find(struct SIMLIST* sl,int value,int index);
+/**
+ * @brief 深拷贝一个节点,注意next指针不会拷贝初始为NULL
+ * 
+ * @param n 节点地址
+ * @return struct node* 
+ * 正常深拷贝后的节点地址，失败返回NULL
+ * 
+ */
+struct node* nodecpy(struct node* n);
 #endif

@@ -124,9 +124,7 @@ void inthandler20h(int* esp){
 		else break;
 	}
 	if(task>2){
-		multipc_ctrl.pc = &prograsses[task-3];
-		taskchange(0,task<<3);
-
+		change_task(task-2);
 	}
 	return;
 }

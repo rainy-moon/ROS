@@ -12,8 +12,7 @@ int init_multipc_ctrl(){
 	multipc_ctrl.total_prograsses = 0;
 	multipc_ctrl.pc = prograsses;
 	multipc_ctrl.stt_tid = timer_malloc(SWITCH_TASK_INTERVEL,0,SWITCH_TASK_DARA);
-	regtask(gs+3,1,103,AR_TSS32);
-	load_tr(3<<3);
+	regtask(1,103,AR_TSS32);
 	return 1;
 }
 
@@ -48,27 +47,48 @@ int create_task(int funcaddr,int level,int flags){
 	return prograsses[i].pid;
 }
 
-void regtask(struct GDT_SEG* gs,int pid,unsigned int limit,unsigned int settings){
-	set_gdt_segment(gs,limit,(unsigned int)&(prograsses[pid-1].tss),settings,0);
+void regtask(int pid,unsigned int limit,unsigned int settings){
+	set_gdt_segment(gs+pid+2,limit,(unsigned int)&(prograsses[pid-1].tss),settings,0);
+	load_tr((pid+2)<<3);
 	prograsses[pid-1].statu = RUNABLE;
+	simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)(prograsses+pid-1),4);
 	multipc_ctrl.total_prograsses++;
 	return;
 }
 
-void change_task(){
-	
+void change_task(int pid){
+	//重置20ms切换计时器?
+	//将当前进程转换成
+	multipc_ctrl.pc = &prograsses[pid-1];
+	taskchange(0,pid+2);
 	return;
 }
 
 void PSleep(struct prograss* p){
-	int index = simlist_find(&(multipc_ctrl.pr),p->pid,3);
-	if(index==-1) return;
-	else {
-		simlist_delete(&(multipc_ctrl.pr),index);
-		simlist_sortedinsert(&(multipc_ctrl.ps),(struct node*)(prograsses+p->pid-1),4);
-		if(p==multipc_ctrl.pc){
-			
+	if(p==multipc_ctrl.pc){
+		//如果休眠当前进程则要进行切换
+		simlist_sortedinsert(&(multipc_ctrl.pd),(struct node*)p,4); 
+		if(multipc_ctrl.pr.size>1){
+			p = (struct prograss*)simlist_delete(&(multipc_ctrl.pr),0);
+			if(p) change_task(p->pid);
 		}
+	}else{
+		int index = simlist_find(&(multipc_ctrl.pr),p->pid,3);
+		if(index==-1);
+		else {
+			simlist_delete(&(multipc_ctrl.pr),index);
+			simlist_sortedinsert(&(multipc_ctrl.pd),(struct node*)(prograsses+p->pid-1),4);
+		}
+	}
+	return;
+}
+
+void PAwake(struct prograss* p){
+	int index = simlist_find(&(multipc_ctrl.pd),p->pid,3);
+	if(index==-1);
+	else{
+		simlist_delete(&(multipc_ctrl.pd),index);
+		simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)(prograsses+p->pid-1),4);
 	}
 	return;
 }
