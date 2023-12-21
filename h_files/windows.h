@@ -16,7 +16,8 @@ struct window
 	/*
 	* 0bit 1已使用 0未使用
 	* 1-3bit 状态位 000激活
-	* 4-7bit 窗口样式 0无边框(桌面鼠标等) 1标准窗口
+	* 4-7bit 窗口样式	0无边框(桌面鼠标等，无法进行输入输出重定向) 
+	*				  	1标准窗口（允许输入输出重定向）
 	*/
 	int sheet_index;//绑定图层
 }windows[MAX_WINDOWS];
@@ -30,6 +31,10 @@ struct MOUSE{
 }mouse;
 // global define
 
+//当前输入定向窗口
+struct window* focused_window;
+//光标状态，0（闪烁）隐藏，1（闪烁）显示，2（永久）隐藏，3（永久）显示
+int cursor_state = 0;
 // function define
 int mouse_create();
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color, int style);

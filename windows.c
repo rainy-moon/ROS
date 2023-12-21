@@ -23,8 +23,9 @@ int mouse_create(){
 }
 
 /*默认窗口
-*desktop窗口为0号窗口
-*debug窗口为1号窗口
+*desktop窗口为1号窗口
+*debug窗口为2号窗口
+*mouse为0号窗口
 */
 
 /**

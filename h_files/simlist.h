@@ -83,4 +83,5 @@ int simlist_find(struct SIMLIST* sl,int value,int index);
  * 
  */
 struct node* nodecpy(struct node* n);
+//#question 是否要实现进程安全链表？
 #endif

@@ -112,17 +112,18 @@ void inthandler20h(int* esp){
 	 */
 	tc.time++;
 	int task = 0;
+	int flag = 0;
 	struct timer* t = (struct timer*)tc.timelist.head;
 	while(1){
 		if(t->timeout<=tc.time){
 			int res = timer_toc();
 			if(task<=2&&res>2) task = res;
-			// my_sprintf(s,"20h:%d %d",res,t->timeout);
-			// win_showsln(2,s,COLOR_BLACK);
+			else if(res==1) flag=1;
 			t = (struct timer*)tc.timelist.head;
 		}
 		else break;
 	}
+	if(flag) IAwake(&prograsses[2]);
 	if(task>2){
 		change_task(task-2);
 	}
@@ -136,6 +137,7 @@ void inthandler20h(int* esp){
 void inthandler21h(int* esp){
 	io_out8(PIC0_OCW2,0x61);
 	io_buffer_push(&kb_buffer_ctrl,io_in8(PORT_GETKEY));
+	IAwake(&prograsses[4]);
 	return;
 }
 /**
@@ -147,6 +149,7 @@ void inthandler2ch(int* esp){
 	io_out8(PIC1_OCW2,0x64);
 	io_out8(PIC0_OCW2,0x62);
 	io_buffer_push(&ms_buffer_ctrl,io_in8(PORT_GETKEY));
+	IAwake(&prograsses[3]);
 	return;
 }
 /**

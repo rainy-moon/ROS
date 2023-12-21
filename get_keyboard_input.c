@@ -7,5 +7,6 @@ void get_keyboard_input(){
 			win_showsln(1,s,7);
 		}
 	}
+	else ISleep(&prograsses[4]);
 	return;
 }

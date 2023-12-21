@@ -82,12 +82,29 @@ int init_multipc_ctrl();
  */
 void change_task(int pid);
 /**
- * @brief 
+ * @brief 不可中断休眠
  *  
  * @param p 进程控制块地址
  * @note 此函数在中断关闭下运行
  */
 void PSleep(struct prograss* p);
+/**
+ * @brief 不可中断唤醒
+ * 
+ * @param p 进程控制块地址
+ */
 void PAwake(struct prograss* p);
+/**
+ * @brief 可中断休眠
+ * @note 此函数在中断关闭下运行
+ * @param p 
+ */
+void ISleep(struct prograss* p);
+/**
+ * @brief 可中断唤醒
+ * 
+ * @param p 
+ */
+void IAwake(struct prograss* p);
 
 #endif

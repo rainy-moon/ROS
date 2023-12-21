@@ -9,10 +9,11 @@ int init_multipc_ctrl(){
 	init_simlist(&(multipc_ctrl.pd));
 	init_simlist(&(multipc_ctrl.pz));
 	init_simlist(&(multipc_ctrl.pn));
-	multipc_ctrl.total_prograsses = 0;
 	multipc_ctrl.pc = prograsses;
 	multipc_ctrl.stt_tid = timer_malloc(SWITCH_TASK_INTERVEL,0,SWITCH_TASK_DARA);
-	regtask(1,103,AR_TSS32);
+	set_gdt_segment(gs+3,103,(unsigned int)&(prograsses[0].tss),AR_TSS32,0);
+	prograsses[0].statu = RUNNING;
+	multipc_ctrl.total_prograsses=1;
 	load_tr(3<<3);
 	return 1;
 }
@@ -67,8 +68,8 @@ void change_task(int pid){
 void PSleep(struct prograss* p){
 	if(p==multipc_ctrl.pc){
 		//如果休眠当前进程则要进行切换
-		simlist_sortedinsert(&(multipc_ctrl.pd),(struct node*)p,4); 
-		if(multipc_ctrl.pr.size>1){
+		simlist_sortedinsert(&(multipc_ctrl.pd),(struct node*)(prograsses+p->pid-1),4); 
+		if(multipc_ctrl.pr.size>=1){
 			p = (struct prograss*)simlist_delete(&(multipc_ctrl.pr),0);
 			if(p) change_task(p->pid);
 		}
@@ -90,5 +91,42 @@ void PAwake(struct prograss* p){
 		simlist_delete(&(multipc_ctrl.pd),index);
 		simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)(prograsses+p->pid-1),4);
 	}
+	return;
+}
+
+void ISleep(struct prograss* p){
+	// int eflags = store_eflags();
+	// cli();
+	
+	if(p==multipc_ctrl.pc){
+		
+		//如果休眠当前进程则要进行切换
+		simlist_sortedinsert(&(multipc_ctrl.ps),(struct node*)(prograsses+p->pid-1),4); 
+		if(multipc_ctrl.pr.size>=1){
+			p = (struct prograss*)simlist_delete(&(multipc_ctrl.pr),0);
+			if(p) change_task(p->pid);
+		}
+	}else{
+		int index = simlist_find(&(multipc_ctrl.pr),p->pid,3);
+		if(index==-1);
+		else {
+			simlist_delete(&(multipc_ctrl.pr),index);
+			simlist_sortedinsert(&(multipc_ctrl.ps),(struct node*)(prograsses+p->pid-1),4);
+		}
+	}
+	//load_eflags(eflags);
+	return;
+}
+
+void IAwake(struct prograss* p){
+	int eflags = store_eflags();
+	cli();
+	int index = simlist_find(&(multipc_ctrl.ps),p->pid,3);
+	if(index==-1);
+	else{
+		simlist_delete(&(multipc_ctrl.ps),index);
+		simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)(prograsses+p->pid-1),4);
+	}
+	load_eflags(eflags);
 	return;
 }

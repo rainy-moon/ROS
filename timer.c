@@ -107,9 +107,13 @@ int timer_toc(){
 	}
 	else if(!timer_delete(((struct timer*)tc.timelist.head)->tid)) return 0;
 	if(temp == SWITCH_TASK_DARA && multipc_ctrl.pr.size>0){
+		// my_sprintf(s,"p %d %d",multipc_ctrl.pr.size,multipc_ctrl.pr.head->val[3]);
+		// win_showsln(2,s,COLOR_BLACK);
 		struct prograss* p = (struct prograss*)simlist_delete(&(multipc_ctrl.pr),0);
 		simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)multipc_ctrl.pc,4); 
-		return ((struct prograss*) multipc_ctrl.pr.head)->pid+2;
+		// my_sprintf(s,"nextp %d %d",multipc_ctrl.pr.size,multipc_ctrl.pc->pid);
+		// win_showsln(2,s,COLOR_BLACK);
+		return p->pid+2;
 	}else{
 		if(temp != SWITCH_TASK_DARA) io_buffer_push(&tm_buffer_ctrl,temp);
 		return 1;
