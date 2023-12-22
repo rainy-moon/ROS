@@ -18,17 +18,7 @@ void get_timer_input(){
 				break;
 			case 2:
 			//todo 光标有点问题，可能需要重新实现窗口画布才能解决
-				if(cursor_state==0||cursor_state==2){
-					cursor_state = (cursor_state/2)+1;
-					g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_BLACK,focused_window->width);
-					sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
-				}
-				else{
-					cursor_state = (cursor_state*4)/3-1;
-					//todo 这里以后要改成窗口背景色
-					g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_WHITE,focused_window->width);
-					sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
-				}
+				
 				break;
 		}
 	}

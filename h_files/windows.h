@@ -33,8 +33,7 @@ struct MOUSE{
 
 //当前输入定向窗口
 struct window* focused_window;
-//光标状态，0（闪烁）隐藏，1（闪烁）显示，2（永久）隐藏，3（永久）显示
-int cursor_state = 0;
+
 // function define
 int mouse_create();
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color, int style);

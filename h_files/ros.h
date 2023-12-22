@@ -42,6 +42,9 @@
 //semaphore.c 信号量实现
 #include "semaphore.h"
 
+//cursor.c 光标显示相关函数
+#include "cursor.h"
+
 //系统任务
 void SwitchTaskTest();
 void TimerInputAction();

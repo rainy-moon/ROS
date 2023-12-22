@@ -102,3 +102,4 @@ void win_showslr(int hwnd,char* s, unsigned char font_color){
 	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,length*8,16);
 	return;
 }
+

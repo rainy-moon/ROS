@@ -58,8 +58,9 @@ void MAIN(){
 	//初始化多任务控制器
 	init_multipc_ctrl();
 
-	//初始化信号量sem1
-	sem1 = init_sem(1,"timeSem");
+	//初始化所有信号量
+	//sem1 = init_sem(1,"sem1");
+	sem_cursor = init_sem(1,"sem_cursor");
 	//
 	int pid_1 = create_task((int)&SwitchTaskTest,0,0);
 	if(pid_1) regtask(pid_1,103,AR_TSS32);

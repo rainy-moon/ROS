@@ -8,7 +8,7 @@ struct semaphore{
 	char* name; //用来debug
 };
 //global define
-struct semaphore* sem1;
+
 //function define
 /**
  * @brief 初始化信号量

@@ -1,0 +1,45 @@
+#include"ros.h"
+
+
+void cursor_update(){
+	semWait(sem_cursor);
+	if(cursor_state==0||cursor_state==2){
+		cursor_state = (cursor_state/2)+1;
+		g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_BLACK,focused_window->width);
+		sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
+	}
+	else{
+		cursor_state = (cursor_state*4)/3-1;
+		//todo 这里以后要改成窗口背景色
+		g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_WHITE,focused_window->width);
+		sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
+	}
+	semSignal(sem_cursor);
+}
+
+void cursor_hide(){ 
+	semWait(sem_cursor);
+	if(cursor_state == 0 || cursor_state == 2);
+	else{
+		//todo 这里以后要改成窗口背景色
+		g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_WHITE,focused_window->width);
+		sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
+	}
+	cursor_state = 2;
+	semSignal(sem_cursor);
+}
+
+void cursor_shown(){
+	semWait(sem_cursor);
+	if(cursor_state == 1||cursor_state == 3);
+	else{
+		g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_BLACK,focused_window->width);
+		sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
+	}
+	cursor_state = 3;
+	semSignal(sem_cursor);
+}
+
+void cursor_pause(){
+	
+}
