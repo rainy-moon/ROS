@@ -10,15 +10,14 @@ void get_timer_input(){
 		int data = io_buffer_pop(&tm_buffer_ctrl);
 		switch(data){
 			case 34:
-				//semSignal(sem1);
-				my_sprintf(s,"10sec %d",time_count);
+				cursor_pause();
+				my_sprintf(s,"10s %d %d",time_count,cursor_state);
 				win_showsln(2,s,COLOR_BLACK);
+				cursor_resume();
 				time_count = 0;
-				//semWait(sem1);
 				break;
 			case 2:
-			//todo 光标有点问题，可能需要重新实现窗口画布才能解决
-				
+				cursor_update();
 				break;
 		}
 	}

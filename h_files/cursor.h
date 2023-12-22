@@ -7,7 +7,7 @@
 int cursor_state = 0;
 //确保光标状态临界区
 struct semaphore* sem_cursor;
-
+int cursor_tid = 0;
 // function define
 /**
  * @brief 光标更新，绑定时钟信号2

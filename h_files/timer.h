@@ -33,6 +33,7 @@ unsigned int time_count = 0;
 int init_timerctrl();
 int timer_malloc(unsigned int timeout,int flags,int data);
 int timer_delete(int tid);
-int timer_reset(int tid,unsigned int timeout,int flags,int data);
+int timer_resetall(int tid,unsigned int timeout,int flags,int data);
+int timer_resettimeout(int tid);
 int timer_toc();
 #endif

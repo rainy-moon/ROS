@@ -50,42 +50,65 @@ int timer_malloc(unsigned int time,int flags,int data){
  * 失败返回0，成功过返回1
  * @param tid 计时器的tid
  * @return int 
+ * @note 注意会释放空间，不需要手动释放
  */
 int timer_delete(int tid){
-	int index=simlist_find(&(tc.timelist),tid,3);
-	if(index == -1) return 0;
 	int flag = store_eflags();
 	cli();
+	int index=simlist_find(&(tc.timelist),tid,3);
+	if(index == -1) {load_eflags(flag); return 0;}
 	int addr = (int)simlist_delete(&(tc.timelist),index);
-	load_eflags(flag);
-	if(!addr) return 0;
-	else if(!mem_free((void*)addr,sizeof(struct timer))) return 0;
+	if(!addr) {load_eflags(flag); return 0;}
 	tc.num--;
+	load_eflags(flag);
+	if(!mem_free((void*)addr,sizeof(struct timer))) return 0;
 	return 1;
 }
 /**
  * @brief 重新设置计时器
  * 失败返回0，成功返回1
  * @param tid 
- * @param timeout 计时10ms*timeout
+ * @param time 计时10ms*timeout
  * @param flags 
  * @param data 
  * @return int 
  */
-int timer_reset(int tid,unsigned int time,int flags,int data){
+int timer_resetall(int tid,unsigned int time,int flags,int data){
 	int index=0;
+	int flag = store_eflags();
+	cli();
 	struct timer* t=(struct timer*)(tc.timelist.head);
 	for(;index<tc.num;index++){
 		if(t->tid==tid) break;
 		else t = t->next;
 	}
-	if(index >= tc.num) return 0;
+	if(index >= tc.num){load_eflags(flag); return 0;}
 	t->flags = flags;
 	t->data = data;
 	t->time = time;
+	t->timeout = time+tc.time;
+	simlist_resort(&(tc.timelist),index,0);
+	load_eflags(flag);
+	return 1;
+}
+/**
+ * @brief 对于超时且循环的计时器重置超时时间
+ * 
+ * @param tid 
+ * @return int 
+ */
+int timer_resettimeout(int tid){
+	int index=0;
 	int flag = store_eflags();
 	cli();
-	t->timeout = time+tc.time;
+	struct timer* t=(struct timer*)(tc.timelist.head);
+	for(;index<tc.num;index++){
+		if(t->tid==tid) break;
+		else t = t->next;
+	}
+	if(index >= tc.num){load_eflags(flag); return 0;}
+	t->timeout = t->time+tc.time;
+	simlist_resort(&(tc.timelist),index,0);
 	load_eflags(flag);
 	return 1;
 }
@@ -99,10 +122,7 @@ int timer_reset(int tid,unsigned int time,int flags,int data){
 int timer_toc(){
 	int temp = ((struct timer*)(tc.timelist.head))->data;
 	if((((struct timer*) tc.timelist.head)->flags&0x00000001) == 0){
-		int time = ((struct timer*)tc.timelist.head)->time;
-		int flags = ((struct timer*)tc.timelist.head)->flags;
-		int data = ((struct timer*)tc.timelist.head)->data;
-		if(!(timer_delete(((struct timer*)tc.timelist.head)->tid) && timer_malloc(time,flags,data)))
+		if(!timer_resettimeout(((struct timer*)(tc.timelist.head))->tid))
 			return 0;
 	}
 	else if(!timer_delete(((struct timer*)tc.timelist.head)->tid)) return 0;

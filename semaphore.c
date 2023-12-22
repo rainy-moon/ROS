@@ -12,7 +12,7 @@ void semWait(struct semaphore* sem){
 	int flags = store_eflags();
 	cli();
 	struct node* temp = nodecpy((struct node*) multipc_ctrl.pc);
-	while(sem->value <= 0){
+	if(sem->value <= 0){
 		simlist_sortedinsert(&(sem->queue),temp,4);
 		sem->value--;
 		PSleep((struct prograss*)temp);

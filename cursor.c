@@ -41,5 +41,28 @@ void cursor_shown(){
 }
 
 void cursor_pause(){
-	
+	semWait(sem_cursor);
+	g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_WHITE,focused_window->width);
+	sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
+
+	if(cursor_tid){
+		timer_delete(cursor_tid);
+		cursor_tid = 0;
+	}
+	semSignal(sem_cursor);
+}
+
+void cursor_resume(){
+	semWait(sem_cursor);
+	if(cursor_state == 0 || cursor_state == 2){
+		g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_WHITE,focused_window->width);
+		sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
+	}
+	else{
+		//todo 这里以后要改成窗口背景色
+		g_showc(sc->sheets[focused_window->sheet_index].buf,2,focused_window->cursor_x,focused_window->cursor_y,COLOR_BLACK,focused_window->width);
+		sheet_refresh(focused_window->sheet_index,focused_window->cursor_x,focused_window->cursor_y,8,16);
+	}
+	cursor_tid = timer_malloc(100,0,2);
+	semSignal(sem_cursor);
 }

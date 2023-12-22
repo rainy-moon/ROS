@@ -66,6 +66,14 @@ int simlist_free(struct SIMLIST* sl);
  */
 void simlist_sortedinsert(struct SIMLIST* sl,struct node* newnode,int index);
 /**
+ * @brief 将某个数值改变的节点重插，重新维护稳定链表
+ * 此方法用来替代原先先删除后再插入的实现
+ * @param sl 链表
+ * @param pos 改变节点的原位置
+ * @param index 大小比较时使用value值的第几个值（0-254）
+ */
+void simlist_resort(struct SIMLIST* sl,int pos,int index);
+/**
  * @brief 查询链表中第index处的值=value的第一个节点
  * 未找到返回-1，找到返回下标
  * @param sl 

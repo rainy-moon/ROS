@@ -75,7 +75,7 @@ void MAIN(){
 	//加入10s计时器,计算性能。
 	timer_malloc(1000,0,34);
 	//1s计时器，控制光标闪烁
-	timer_malloc(100,0,2);
+	cursor_tid = timer_malloc(100,0,2);
 	//打开中断
 	sti();
 	while(1) {
@@ -100,3 +100,4 @@ void MAIN(){
 #include"get_mouse_input.c"
 #include"get_timer_input.c"
 #include"semaphore.c"
+#include"cursor.c"

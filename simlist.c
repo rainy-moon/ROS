@@ -92,6 +92,30 @@ void simlist_sortedinsert(struct SIMLIST* sl,struct node* newnode,int index){
 	return ;
 }
 
+void simlist_resort(struct SIMLIST* sl,int pos,int index){
+	struct node* p = sl->head;
+	if(!pos){
+		//链表头重排
+		if(!(p->next) || p->val[index]<p->next->val[index]);//头结点还是最小，不变
+		else{
+			struct node* q = p->next;
+			while(q->next&&q->next->val[index]<=p->val[index])
+				q=q->next;
+			sl->head = p->next;
+			p->next = q->next;
+			q->next = p;
+		}
+	}
+	else{
+		while(--pos)
+			p = p->next;
+		struct node* q = p->next;
+		p->next = q->next;
+		sl->size--;
+		simlist_sortedinsert(sl,q,index);
+	}
+}
+
 int simlist_find(struct SIMLIST* sl,int value,int index){
 	int i=0;
 	struct node* n = sl->head;
