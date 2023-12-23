@@ -25,7 +25,7 @@
 struct SHEET{
 	int z,width,height;
 	int x,y;
-	int flag; //标记是否使用 1使用 0未使用
+	int flag; //标记是否使用  0未使用 使用则绑定窗口hwnd+1,注意+1！！！
 	unsigned char* buf;
 };
 struct sheet_ctrl{
@@ -51,7 +51,7 @@ void init_sheet_ctrl();
 void sheet_updatez(int index,int z);
 void sheet_hide(int index);
 void sheet_display(int index,int z);
-int sheet_malloc(int x,int y,int width,int height,int z,unsigned char* buffer);
+int sheet_malloc(int x,int y,int width,int height,int z,unsigned char* buffer,int hwndp1);
 void sheet_free(int index);
 void init_screen_buf();
 void sheet_refresh(int index,int x0,int y0,int width,int height);

@@ -46,7 +46,7 @@
 #include "cursor.h"
 
 //系统任务
-void SwitchTaskTest();
+void MouseDetector();
 void TimerInputAction();
 void MouseInputAction();
 void KeyInputAction();

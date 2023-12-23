@@ -49,7 +49,7 @@ int get_mouse_input(int ms_state){
 				}
 				else break;
 			}
-			else {ISleep(&prograsses[3]); break;}
+			//else {ISleep(&prograsses[3]); break;}
 		case 3:
 			if(io_buffer_num(&ms_buffer_ctrl)){
 				int data = io_buffer_pop(&ms_buffer_ctrl);
@@ -57,10 +57,27 @@ int get_mouse_input(int ms_state){
 					mouse.mouse_state[2]=(unsigned char)data;
 					ms_state = 1;
 					mouse_decode();
+					IAwake(&prograsses[1]);
 				}
 				else break;
 			}
-			else {ISleep(&prograsses[3]); break;}
+			//else {ISleep(&prograsses[3]); break;}
 	}
 	return ms_state;	
+}
+
+void mousedetector(){
+	int i = sc->top-1;
+	for(;i>=0;i--)
+		if(pix_in_sheet(mouse.posx,mouse.posy,i)) break;
+	if(i==-1){
+		my_sprintf(s,"mouse %d %d",mouse.btn,-1);
+		win_showslr(1,s,COLOR_BLACK);
+	}
+	else{
+		mouse.hwndp1 = sc->sheet_zlevel[i]->flag;
+		my_sprintf(s,"mouse %d %d",mouse.btn,mouse.hwndp1-1);
+		win_showslr(1,s,COLOR_BLACK);
+	}
+	ISleep(&prograsses[1]);
 }

@@ -161,11 +161,9 @@ void inthandler27h(int* esp){
 	io_out8(PIC0_OCW2,0X67);
 	return;
 }
-void SwitchTaskTest(){
+void MouseDetector(){
 	for(;;){
-		// my_sprintf(s,"cursor %d %d %d",cursor_state,tc.num,cursor_tid);
-		// win_showslr(1,s,COLOR_LIGHT_GREEN);
-		hlt();
+		mousedetector();
 	}
 }
 void TimerInputAction(){

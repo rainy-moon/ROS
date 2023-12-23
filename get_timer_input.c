@@ -10,7 +10,7 @@ void get_timer_input(){
 		int data = io_buffer_pop(&tm_buffer_ctrl);
 		switch(data){
 			case 34:
-				my_sprintf(s,"10s %d %d",time_count,cursor_state);
+				my_sprintf(s,"5s %d",time_count);
 				win_showsln(2,s,COLOR_BLACK);
 				time_count = 0;
 				break;

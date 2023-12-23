@@ -20,8 +20,9 @@ struct window
 	int statu;
 	/*
 	* 0bit 1已使用 0未使用
-	* 1-3bit 状态位 000激活
-	* 4-7bit 窗口样式	0无边框(桌面鼠标等，无法进行输入输出重定向) 
+	* 1-3bit 状态位 000激活 001鼠标覆盖
+				    100左键命中  
+	* 4-7bit 窗口样式	0无边框特殊窗口(桌面鼠标等，无法进行输入输出重定向) 
 	*				  	1标准窗口（允许输入输出重定向）
 	*/
 	int sheet_index;//绑定图层
@@ -32,6 +33,12 @@ struct MOUSE{
 	int hwnd;//窗口id
 	int x,y;//鼠标移动数据
 	int ms_state,btn; 
+	int hwndp1;//鼠标尖覆盖的窗口hwnd+1
+	/*btn : 1 左键按下
+			2 右键按下
+			3 左右同时按下
+			4 中间按下		
+	*/
 	int posx,posy; //鼠标位置
 }mouse;
 // global define

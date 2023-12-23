@@ -364,12 +364,13 @@ void sheet_display(int index,int z){
  * @param height 
  * @param z 
  * @param buffer 
+ * @param hwndp1 所绑定的窗口的hwnd+1
  * @return int 
  */
-int sheet_malloc(int x,int y,int width,int height,int z,unsigned char* buffer){
+int sheet_malloc(int x,int y,int width,int height,int z,unsigned char* buffer,int hwndp1){
 	for(int i=0;i<MAX_SHEETS;i++){
 		if(sc->sheets[i].flag==0){
-			sc->sheets[i].flag=1;
+			sc->sheets[i].flag=hwndp1;
 			sc->sheets[i].x=x;
 			sc->sheets[i].y=y;
 			sc->sheets[i].width=width;

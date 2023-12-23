@@ -54,7 +54,7 @@ void MAIN(){
 	// 键盘输入测试窗口
 	win_create("keyin",10,500,500,200, sc->top,COLOR_WHITE,1);
 	//手动默认初始激活窗口为键盘输入测试
-	focused_window = windows+2;
+	focused_window = windows+3;
 	//初始化计时器
 	init_timerctrl();
 	//初始化多任务控制器
@@ -64,7 +64,7 @@ void MAIN(){
 	//sem1 = init_sem(1,"sem1");
 	sem_cursor = init_sem(1,"sem_cursor");
 	//
-	int pid_1 = create_task((int)&SwitchTaskTest,0,0);
+	int pid_1 = create_task((int)&MouseDetector,0,0);
 	if(pid_1) regtask(pid_1,103,AR_TSS32);
 	int pid_2 = create_task((int)&TimerInputAction,0,0);
 	if(pid_2) regtask(pid_2,103,AR_TSS32);
@@ -75,7 +75,7 @@ void MAIN(){
 	// my_sprintf(s,"p %d %d %d %d",pid_1,pid_2,pid_3,pid_4);
 	// win_showsln(2,s,COLOR_BLACK);
 	//加入10s计时器,计算性能。i
-	timer_malloc(1000,0,34);
+	timer_malloc(500,0,34);
 	//1s计时器，控制光标闪烁
 	cursor_tid = timer_malloc(50,0,2);
 	//打开中断

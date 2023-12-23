@@ -9,7 +9,7 @@ int mouse_create(){
 		windows[i].height=16;
 		unsigned char* buffer = g_boxfill(8,16, 255);
 		windows[i].hwnd = i;
-		windows[i].sheet_index = sheet_malloc(160,100,8,16,sc->top+1,buffer);
+		windows[i].sheet_index = sheet_malloc(160,100,8,16,sc->top+1,buffer,i+1);
 		if(windows[i].sheet_index<0) break;
 		windows[i].statu |= 0x1;
 		g_showc(buffer,1,0,0,COLOR_LIGHT_PURPLE,windows[i].width);
@@ -66,7 +66,7 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 				break;
 		}
 		windows[i].hwnd = i;
-		windows[i].sheet_index = sheet_malloc(windows[i].x0,windows[i].y0,windows[i].width,windows[i].height,z,buffer);
+		windows[i].sheet_index = sheet_malloc(windows[i].x0,windows[i].y0,windows[i].width,windows[i].height,z,buffer,i+1);
 		int j = 0;
 		for(;*name_temp;name_temp++,j++)
 			windows[i].name[j] = *name;
@@ -102,7 +102,7 @@ void win_showsln(int hwnd, char* s, unsigned char font_color){
  * @param font_color 
  */
 void win_showslr(int hwnd,char* s, unsigned char font_color){
-	g_v_boxfill(sc->sheets[windows[hwnd].sheet_index].buf,windows[hwnd].width,windows[hwnd].cursor_x,windows[hwnd].cursor_y,my_strlen(s),16,COLOR_WHITE);
+	g_v_boxfill(sc->sheets[windows[hwnd].sheet_index].buf,windows[hwnd].width,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,my_strlen(s)*8,16,windows[hwnd].bg_color);
 	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width,windows[hwnd].ins_width,windows[hwnd].ins_height);
 	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,length*8,16);
 	return;
