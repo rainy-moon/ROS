@@ -38,6 +38,7 @@ int mouse_create(){
  * @param height 
  * @param z 创建时窗口z层数
  * @param bg_color 
+ * @param style 窗口模式
  * @return int 正常返回窗口id，错误（无法建更多窗口）-1
  */
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color,int style){
@@ -52,7 +53,9 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 		unsigned char* buffer;
 		switch(style){
 			case 0:
-				buffer = g_boxfill(windows[i].width,windows[i].height, bg_color);
+				windows[i].width = width;
+				windows[i].height = height;
+				buffer = g_boxfill(width,height, bg_color);
 				break;
 			case 1:
 				windows[i].x0-=SHADOW_PIX;
@@ -86,7 +89,7 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 void win_showsln(int hwnd, char* s, unsigned char font_color){
 	if(hwnd == focused_window->hwnd) cursor_pause();
 	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width,windows[hwnd].ins_width,windows[hwnd].ins_height);
-	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,length*8,16);
+	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,length*8,16);
 	windows[hwnd].cursor_y+=16;
 	if(hwnd == focused_window->hwnd) cursor_resume();
 	return;
@@ -101,7 +104,7 @@ void win_showsln(int hwnd, char* s, unsigned char font_color){
 void win_showslr(int hwnd,char* s, unsigned char font_color){
 	g_v_boxfill(sc->sheets[windows[hwnd].sheet_index].buf,windows[hwnd].width,windows[hwnd].cursor_x,windows[hwnd].cursor_y,my_strlen(s),16,COLOR_WHITE);
 	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width,windows[hwnd].ins_width,windows[hwnd].ins_height);
-	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,length*8,16);
+	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,length*8,16);
 	return;
 }
 /**
@@ -114,14 +117,13 @@ void win_showslr(int hwnd,char* s, unsigned char font_color){
 void win_showc(int hwnd,char c,unsigned char font_color){
 	if(hwnd == focused_window->hwnd) cursor_pause();
 	if(c=='\n') {
-		windows[hwnd].cursor_y+=16;
-		windows[hwnd].cursor_x = 14;
+		windows[hwnd].cursor_y += 16;
+		windows[hwnd].cursor_x = LS_INTERVAL;
 	}
 	else{
-		g_showc(sc->sheets[windows[hwnd].sheet_index].buf,c,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
-		sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,8,16);
+		g_showc(sc->sheets[windows[hwnd].sheet_index].buf,c,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,font_color,windows[hwnd].width);
+		sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,8,16);
 		windows[hwnd].cursor_x+=8;
-
 	}
 	if(hwnd == focused_window->hwnd) cursor_resume();
 }

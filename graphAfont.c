@@ -1,7 +1,7 @@
 #include"ros.h"
 
 void init_color_plate(){
-	unsigned char color_rgb[24][3] = {
+	unsigned char color_rgb[22][3] = {
 		{0x00,0x00,0x00}, 	//0：黑色
 		{0xff,0x00,0x00},	//1：亮红
 		{0x00,0xff,0x00},	//2：亮绿
@@ -27,7 +27,7 @@ void init_color_plate(){
 	};
 	cli();
 	io_out8(0x03c8,0);
-	for(int i=0;i<24;i++){
+	for(int i=0;i<22;i++){
 		io_out8(0x03c9,color_rgb[i][0]/4);
 		io_out8(0x03c9,color_rgb[i][1]/4);
 		io_out8(0x03c9,color_rgb[i][2]/4);
@@ -142,13 +142,13 @@ unsigned char* g_windowfill(const char* name,int width,int height,unsigned char 
 	for(int i = 0;i<SHADOW_PIX;i++)
 		g_v_edgefill(p,width,i,i,1,width-2*i,height-2*i,i+16);
 	//主窗体
-	g_v_boxfill(p,width,SHADOW_PIX,SHADOW_PIX,width-2*SHADOW_PIX,height-2*SHADOW_PIX,COLOR_WHITE);
+	g_v_boxfill(p,width,SHADOW_PIX,SHADOW_PIX,width-2*SHADOW_PIX,height-2*SHADOW_PIX,color);
 	//分割线
 	g_v_boxfill(p,width,SHADOW_PIX,SHADOW_PIX+22,width-2*SHADOW_PIX,2,COLOR_LIGHT_GREY);
 	//关闭
 	g_v_boxfill(p,width,width-SHADOW_PIX-22,SHADOW_PIX+3,16,16,1);
 	//窗口名
-	g_shows(p,name,SHADOW_PIX+6,SHADOW_PIX+3,COLOR_BLACK,width,ins_x,ins_y);
+	g_shows(p,name,6,-21,COLOR_BLACK,width,ins_x,ins_y);
 	return p;
 }
 /**
@@ -186,7 +186,6 @@ void g_showc(unsigned char*p, char c, int x0, int y0, char color ,int sizex){
  */
 int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex,int ins_x,int ins_y){
 	
-	extern char WORDS[128][16];
 	int count = 0;
 	int x = x0;
 	int y = y0;

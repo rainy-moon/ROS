@@ -60,6 +60,7 @@
     "*.wxss": "css",
     "*.wxs": "javascript",
     "*.nas": "nasm",
-    "simlist.h": "c"
+    "simlist.h": "c",
+    "ros.h": "c"
   }
 }
