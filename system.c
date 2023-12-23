@@ -163,8 +163,8 @@ void inthandler27h(int* esp){
 }
 void SwitchTaskTest(){
 	for(;;){
-		my_sprintf(s,"cursor %d %d %d",cursor_state,tc.num,cursor_tid);
-		win_showslr(1,s,COLOR_LIGHT_GREEN);
+		// my_sprintf(s,"cursor %d %d %d",cursor_state,tc.num,cursor_tid);
+		// win_showslr(1,s,COLOR_LIGHT_GREEN);
 		hlt();
 	}
 }

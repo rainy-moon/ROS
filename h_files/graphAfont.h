@@ -46,7 +46,7 @@ unsigned char* g_boxfill(int width, int height, unsigned char color);
 void g_v_edgefill(unsigned char*p,int sizex, int x0,int y0,int board,int width,int height,unsigned char color);
 unsigned char* g_edgefill(int board, int width,int height,unsigned char color);
 void g_showc(unsigned char*p, char c, int x0, int y0, char color ,int sizex);
-int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex);
+int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex,int ins_x,int ins_y);
 void init_sheet_ctrl();
 void sheet_updatez(int index,int z);
 void sheet_hide(int index);

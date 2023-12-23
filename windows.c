@@ -45,8 +45,9 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 		if(windows[i].statu&0x1) continue;
 		windows[i].x0 = x0;
 		windows[i].y0 = y0;
-		windows[i].width= width;
-		windows[i].height=height;
+		windows[i].ins_width = width;
+		windows[i].ins_height = height;
+		windows[i].bg_color=bg_color;
 		char* name_temp = name;
 		unsigned char* buffer;
 		switch(style){
@@ -55,10 +56,10 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 				break;
 			case 1:
 				windows[i].x0-=SHADOW_PIX;
-				windows[i].y0-=SHADOW_PIX;
-				windows[i].width+=2*SHADOW_PIX;
-				windows[i].height+=2*SHADOW_PIX+24;
-				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color);
+				windows[i].y0-=(SHADOW_PIX+WINDOWHEAD_PIX);
+				windows[i].width = width+2*SHADOW_PIX;
+				windows[i].height = height+2*SHADOW_PIX+24;
+				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color,windows[i].ins_width,windows[i].ins_height);
 				break;
 		}
 		windows[i].hwnd = i;
@@ -69,8 +70,8 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 		windows[i].name[j] = '\0';
 		windows[i].statu |= (style<<4)+0x1;
 		//g_shows(name,0,0,7,windows[i].sheet_index);
-		windows[i].cursor_x = 14;
-		windows[i].cursor_y = 36;
+		windows[i].cursor_x = LS_INTERVAL;
+		windows[i].cursor_y = RS_INTERVAL;
 		return i;
 	}
 	return -1;
@@ -83,9 +84,11 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
  * @param font_color 
  */
 void win_showsln(int hwnd, char* s, unsigned char font_color){
-	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
+	if(hwnd == focused_window->hwnd) cursor_pause();
+	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width,windows[hwnd].ins_width,windows[hwnd].ins_height);
 	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,length*8,16);
 	windows[hwnd].cursor_y+=16;
+	if(hwnd == focused_window->hwnd) cursor_resume();
 	return;
 }
 /**
@@ -96,10 +99,30 @@ void win_showsln(int hwnd, char* s, unsigned char font_color){
  * @param font_color 
  */
 void win_showslr(int hwnd,char* s, unsigned char font_color){
-	//清空一行
-	g_v_boxfill(sc->sheets[windows[hwnd].sheet_index].buf,windows[hwnd].width,windows[hwnd].cursor_x,windows[hwnd].cursor_y,windows[hwnd].width-16,16,COLOR_WHITE);
-	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
+	g_v_boxfill(sc->sheets[windows[hwnd].sheet_index].buf,windows[hwnd].width,windows[hwnd].cursor_x,windows[hwnd].cursor_y,my_strlen(s),16,COLOR_WHITE);
+	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width,windows[hwnd].ins_width,windows[hwnd].ins_height);
 	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,length*8,16);
 	return;
+}
+/**
+ * @brief 显示字符，'\n'换行
+ * 
+ * @param hwnd 
+ * @param c 
+ * @param font_color 
+ */
+void win_showc(int hwnd,char c,unsigned char font_color){
+	if(hwnd == focused_window->hwnd) cursor_pause();
+	if(c=='\n') {
+		windows[hwnd].cursor_y+=16;
+		windows[hwnd].cursor_x = 14;
+	}
+	else{
+		g_showc(sc->sheets[windows[hwnd].sheet_index].buf,c,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
+		sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x,windows[hwnd].cursor_y,8,16);
+		windows[hwnd].cursor_x+=8;
+
+	}
+	if(hwnd == focused_window->hwnd) cursor_resume();
 }
 

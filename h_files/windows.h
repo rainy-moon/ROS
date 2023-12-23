@@ -3,15 +3,20 @@
 #include "ros.h"
 #define MAX_WINDOWS			10
 #define SHADOW_PIX			6		//窗口边缘羽化度
+#define WINDOWHEAD_PIX		24		//类型1窗口名高度
+#define LS_INTERVAL			8		//行距正文左侧开始间隔
+#define RS_INTERVAL			4		//列距正文上方开始间隔
 // struct define
 struct window
 {
 	//窗体名字不超过19字符
 	char name[20];
 	int hwnd;
-	int cursor_x; int cursor_y;//光标位置
+	int cursor_x; int cursor_y;//光标位置(相对窗口正文可输入开始位置)
 	int x0; int y0;
 	int width; int height;
+	int ins_width;int ins_height;
+	unsigned char bg_color;
 	int statu;
 	/*
 	* 0bit 1已使用 0未使用
@@ -39,5 +44,5 @@ int mouse_create();
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color, int style);
 void win_showsln(int hwnd, char* s, unsigned char font_color);
 void win_showslr(int hwnd, char* s, unsigned char font_color);
-
+void win_showc(int hwnd,char c,unsigned char font_color);
 #endif

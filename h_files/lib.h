@@ -17,4 +17,15 @@ void my_itos(char*s, int data);
  * @param data 
  */
 void my_sprintf(char* s,const char* ss,...);
+int my_strlen(const char* s);
+/**
+ * @brief 比较字符串相同
+ * 
+ * @param s1 
+ * @param s2 
+ * @param length 比较位数
+ * @return int 0相同，index+1第一个不相同的位置
+ * @note 如果长度都比比较位数短且相同，则认为相同
+ */
+int my_strcmp(const char* s1,const char* s2,int length);
 #endif

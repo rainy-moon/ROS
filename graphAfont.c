@@ -134,7 +134,7 @@ void g_v_edgefill(unsigned char*p,int sizex, int x0,int y0,int board,int width,i
  * @param color 窗口背景色
  * @return unsigned char* 
  */
-unsigned char* g_windowfill(const char* name,int width,int height,unsigned char color){
+unsigned char* g_windowfill(const char* name,int width,int height,unsigned char color,int ins_x,int ins_y){
 	if(height>sc->maxy) height = sc->maxy;
 	if(width>sc->maxx) width = sc->maxx;
 	unsigned char* p = (unsigned char*)mem_malloc(height*width);
@@ -148,7 +148,7 @@ unsigned char* g_windowfill(const char* name,int width,int height,unsigned char 
 	//关闭
 	g_v_boxfill(p,width,width-SHADOW_PIX-22,SHADOW_PIX+3,16,16,1);
 	//窗口名
-	g_shows(p,name,SHADOW_PIX+6,SHADOW_PIX+3,COLOR_BLACK,width);
+	g_shows(p,name,SHADOW_PIX+6,SHADOW_PIX+3,COLOR_BLACK,width,ins_x,ins_y);
 	return p;
 }
 /**
@@ -156,8 +156,8 @@ unsigned char* g_windowfill(const char* name,int width,int height,unsigned char 
  * 
  * @param p 数组
  * @param c 字符
- * @param x0 相对位置x
- * @param y0 相对位置y
+ * @param x0 窗口相对位置x（窗口总图层）
+ * @param y0 窗口相对位置y（窗口总图层）
  * @param color 
  * @param sizex 原数组宽度
  */
@@ -176,19 +176,28 @@ void g_showc(unsigned char*p, char c, int x0, int y0, char color ,int sizex){
  * 
  * @param p 原数组
  * @param string 
- * @param x0 相对位置x
- * @param y0 相对位置y
+ * @param x0 正文内容相对位置x
+ * @param y0 正文内容相对位置y
  * @param color 
  * @param sizex 原图层宽度
+ * @param ins_x 正文内容可用宽度
+ * @param ins_y 正文内容可用高度
  * @return int 字符串长度，不包括\0
  */
-int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex){
+int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex,int ins_x,int ins_y){
 	
 	extern char WORDS[128][16];
 	int count = 0;
 	int x = x0;
+	int y = y0;
 	for(;*string;string++,x+=8,count++){
-		g_showc(p,*string,x,y0,color,sizex);
+		if(x+8>ins_x){
+			//超过正文内容显示区域，换行
+			x = LS_INTERVAL;
+			y += 16;
+		}
+		//todo 如果超过高度限制屏幕上滚
+		g_showc(p,*string,x+SHADOW_PIX,y+SHADOW_PIX+WINDOWHEAD_PIX,color,sizex);
 	}
 	return count;
 }
