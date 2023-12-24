@@ -28,4 +28,21 @@ int my_strlen(const char* s);
  * @note 如果长度都比比较位数短且相同，则认为相同
  */
 int my_strcmp(const char* s1,const char* s2,int length);
+/**
+ * @brief 返回两个数中大的数值
+ * 
+ * @param a1 
+ * @param a2 
+ * @return int 
+ */
+int max(int a1,int a2);
+/**
+ * @brief 返回两个数中小的数值
+ * 
+ * @param a1 
+ * @param a2 
+ * @return int 
+ */
+int min(int a1,int a2);
+
 #endif

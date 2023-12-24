@@ -71,7 +71,7 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 		for(;*name_temp;name_temp++,j++)
 			windows[i].name[j] = *name;
 		windows[i].name[j] = '\0';
-		windows[i].statu |= (style<<4)+0x1;
+		windows[i].statu |= (style<<8)+0x1;
 		//g_shows(name,0,0,7,windows[i].sheet_index);
 		windows[i].cursor_x = LS_INTERVAL;
 		windows[i].cursor_y = RS_INTERVAL;

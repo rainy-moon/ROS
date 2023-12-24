@@ -74,7 +74,7 @@ void MAIN(){
 	if(pid_4) regtask(pid_4,103,AR_TSS32);
 	// my_sprintf(s,"p %d %d %d %d",pid_1,pid_2,pid_3,pid_4);
 	// win_showsln(2,s,COLOR_BLACK);
-	//加入10s计时器,计算性能。i
+	//加入10s计时器,计算性能。
 	timer_malloc(500,0,34);
 	//1s计时器，控制光标闪烁
 	cursor_tid = timer_malloc(50,0,2);

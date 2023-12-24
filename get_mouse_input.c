@@ -56,7 +56,7 @@ int get_mouse_input(int ms_state){
 				if(data!=-1){
 					mouse.mouse_state[2]=(unsigned char)data;
 					ms_state = 1;
-					mouse_decode();
+					mouse_decode();					
 					IAwake(&prograsses[1]);
 				}
 				else break;
@@ -71,13 +71,85 @@ void mousedetector(){
 	for(;i>=0;i--)
 		if(pix_in_sheet(mouse.posx,mouse.posy,i)) break;
 	if(i==-1){
-		my_sprintf(s,"mouse %d %d",mouse.btn,-1);
-		win_showslr(1,s,COLOR_BLACK);
+		if(mouse.hwndp1){
+			windows[mouse.hwndp1-1].statu&=0xffffff01;
+			windows[mouse.hwndp1-1].mouse_x=0x7fffffff;
+			windows[mouse.hwndp1-1].mouse_y=0x7fffffff;
+			mouse.hwndp1=0;
+		}
 	}
 	else{
-		mouse.hwndp1 = sc->sheet_zlevel[i]->flag;
-		my_sprintf(s,"mouse %d %d",mouse.btn,mouse.hwndp1-1);
-		win_showslr(1,s,COLOR_BLACK);
+		if(mouse.hwndp1 != sc->sheet_zlevel[i]->flag){
+			if(!mouse.hwndp1){
+				mouse.hwndp1 = sc->sheet_zlevel[i]->flag;
+				windows[mouse.hwndp1-1].statu|=0x00000002;
+				windows[mouse.hwndp1-1].mouse_x = mouse.posx-windows[mouse.hwndp1-1].x0;
+				windows[mouse.hwndp1-1].mouse_y = mouse.posy-windows[mouse.hwndp1-1].y0;
+			}
+			else if((windows[mouse.hwndp1-1].statu&0xff)>>1==1){
+				windows[mouse.hwndp1-1].mouse_x=0x7fffffff;
+				windows[mouse.hwndp1-1].mouse_y=0x7fffffff;
+				windows[mouse.hwndp1-1].statu&=0xffffff01;
+				mouse.hwndp1 = sc->sheet_zlevel[i]->flag;
+				windows[mouse.hwndp1-1].mouse_x = mouse.posx-windows[mouse.hwndp1-1].x0;
+				windows[mouse.hwndp1-1].mouse_y = mouse.posy-windows[mouse.hwndp1-1].y0;
+				windows[mouse.hwndp1-1].statu|=0x00000002;
+			}
+		}
+		
+		int statu = (windows[mouse.hwndp1-1].statu&0xff)>>1;
+		struct window* w = &(windows[mouse.hwndp1-1]);
+		//检查鼠标状态
+		switch(mouse.btn){
+			case 0:
+			{
+				if(statu==2){
+					//点击
+					w->statu&=0xffffff01;
+					w->statu|=0x00000002;
+					if((w->statu>>8)&0x1){
+						cursor_pause();
+						if(w->statu&0x0000ff00) focused_window = w;
+						sheet_updatez(w->sheet_index,sc->top-1);
+						cursor_resume();
+					}
+					//todo 点击区域事件检查
+				}else if(statu==4){
+					//松开拖动
+					w->statu&=0xffffff01;
+					w->statu|=0x00000002;
+				}
+				break;
+			}
+			case 1:
+			{
+				if(statu == 1 ){
+					w->statu&=0xffffff01;
+					w->statu|=0x00000004;
+					
+				}
+				else if((statu==2||statu==4)&&(mouse.x||mouse.y)){
+					//拖动
+					w->statu&=0xffffff01;
+					w->statu|=0x00000008;
+					if((w->statu>>8)&0x1){
+						cursor_pause();
+						// int eflag = store_eflags();
+						// cli();
+						w->x0+=mouse.posx-w->x0-w->mouse_x;
+						w->y0+=mouse.posy-w->y0-w->mouse_y;
+						sheet_slide(w->x0,w->y0,w->sheet_index);
+						// load_eflags(eflag);
+						cursor_resume();
+					}
+				}
+				break;
+			}
+		}
+		w->mouse_x=mouse.posx-w->x0;
+		w->mouse_y=mouse.posy-w->y0;	
 	}
+	my_sprintf(s,"mouse %d %d %d",mouse.btn,mouse.hwndp1-1,(windows[mouse.hwndp1-1].statu&0xff)>>1);
+	win_showslr(1,s,COLOR_BLACK);
 	ISleep(&prograsses[1]);
 }

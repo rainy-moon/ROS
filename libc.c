@@ -93,3 +93,13 @@ int my_strcmp(const char* s1,const char* s2,int length){
 	}
 	return 0;
 }
+
+int max(int a1,int a2){
+	if(a1>a2) return a1;
+	else return a2;
+}
+
+int min(int a1,int a2){
+	if(a1<a2) return a1;
+	else return a2;
+}

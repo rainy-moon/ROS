@@ -327,8 +327,7 @@ void sheet_hide(int index){
 	return;
 }
 void sheet_display(int index,int z){
-	if(sc->sheets[index].z>=0);
-	else{
+	if(sc->sheets[index].z<0){
 		//将上方的图层整体上移一层
 		for(int i=sc->top+1;i>z;i--){
 			sc->sheet_zlevel[i]=sc->sheet_zlevel[i-1];
@@ -339,20 +338,21 @@ void sheet_display(int index,int z){
 		sc->sheets[index].z = z;
 		//总图层加1
 		sc->top ++;
-		int x1 = sc->sheets[index].x+sc->sheets[index].width;
-		int y1 = sc->sheets[index].y+sc->sheets[index].height;
-		//遍历新加图层范围重新渲染
-		for(int i = sc->sheets[index].y;i<y1&&i<sc->maxy;i++)
-			for(int j=sc->sheets[index].x;j<x1&&j<sc->maxx&&j>=0;j++){
-				int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
-				//如果没有该像素处没有图层或者图层层数<新加图层 & 不是透明色255
-				if((sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP ) && (!screen_buf[i*sc->maxx+j]||screen_buf[i*sc->maxx+j]->z<z)) {
-					//记录为当前图层，渲染颜色
-					screen_buf[i*sc->maxx+j] = sc->sheet_zlevel[z];
-					screen[i*sc->maxx+j] = sc->sheet_zlevel[z]->buf[point];
-				}
-			}
 	}
+	int x1 = sc->sheets[index].x+sc->sheets[index].width;
+	int y1 = sc->sheets[index].y+sc->sheets[index].height;
+	//遍历新加图层范围重新渲染
+	for(int i = sc->sheets[index].y;i<y1&&i<sc->maxy;i++)
+		for(int j=sc->sheets[index].x;j<x1&&j<sc->maxx&&j>=0;j++){
+			int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
+			//如果没有该像素处没有图层或者图层层数<=新加图层 & 不是透明色255
+			if((sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP ) && (!screen_buf[i*sc->maxx+j]||screen_buf[i*sc->maxx+j]->z<z)) {
+				//记录为当前图层，渲染颜色
+				screen_buf[i*sc->maxx+j] = sc->sheet_zlevel[z];
+				screen[i*sc->maxx+j] = sc->sheet_zlevel[z]->buf[point];
+			}
+		}
+
 	return;
 }
 /**
@@ -441,9 +441,33 @@ int pix_in_sheet(int x,int y,int z){
 
 void sheet_slide(int x,int y,int index){
 	int h = sc->sheets[index].z;
-	sheet_hide(index);
+	int old_x = sc->sheets[index].x;
+	int old_y = sc->sheets[index].y;
+	int x1 = old_x+sc->sheets[index].width;
+	int y1 = old_y+sc->sheets[index].height;
+	int x2 = x+sc->sheets[index].width;
+	int y2 = y+sc->sheets[index].height;
+	//sheet_hide(index);
 	sc->sheets[index].x=x;
 	sc->sheets[index].y=y;
 	sheet_display(index,h);
+	int param[8] = {old_y,y1,old_x,x1,0,0,0,0};
+	
+	for(int i = param[0];i<param[1];i++){
+		for(int j=param[2];j<param[3];j++){
+			for(int k = sc->sheets[index].z;k>=0;k--){
+				if(screen_buf[i*sc->maxx+j]!=&(sc->sheets[index])) continue;
+				else{
+					int point = (i-sc->sheet_zlevel[k]->y)*sc->sheet_zlevel[k]->width+(j-sc->sheet_zlevel[k]->x);
+					if(pix_in_sheet(j,i,k) && sc->sheet_zlevel[k]->buf[point]!=COLOR_TRANSP){
+						screen_buf[i*sc->maxx+j] = sc->sheet_zlevel[k];
+						screen[i*sc->maxx+j] = sc->sheet_zlevel[k]->buf[point];
+						break;
+					}
+				}
+			}
+		}
+	}
+
 	return;
 }
