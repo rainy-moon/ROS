@@ -61,14 +61,14 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 				windows[i].x0-=SHADOW_PIX;
 				windows[i].y0-=(SHADOW_PIX+WINDOWHEAD_PIX);
 				windows[i].width = width+2*SHADOW_PIX;
-				windows[i].height = height+2*SHADOW_PIX+24;
+				windows[i].height = height+2*SHADOW_PIX+WINDOWHEAD_PIX;
 				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color,windows[i].ins_width,windows[i].ins_height);
 				break;
 			case 2:
 				windows[i].x0-=SHADOW_PIX;
 				windows[i].y0-=(SHADOW_PIX+WINDOWHEAD_PIX);
 				windows[i].width = width+2*SHADOW_PIX;
-				windows[i].height = height+2*SHADOW_PIX+24;
+				windows[i].height = height+2*SHADOW_PIX+WINDOWHEAD_PIX;
 				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color,windows[i].ins_width,windows[i].ins_height);
 		}
 		windows[i].hwnd = i;
@@ -94,22 +94,22 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
  */
 void win_showsln(int hwnd, char* s, unsigned char font_color){
 	if(hwnd == focused_window->hwnd) cursor_pause();
-	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width,windows[hwnd].ins_width,windows[hwnd].ins_height);
+	int length = g_winshows(windows[hwnd].sheet_index,hwnd,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
 	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,length*8,16);
 	windows[hwnd].cursor_y+=16;
+	windows[hwnd].cursor_x=LS_INTERVAL;
 	if(hwnd == focused_window->hwnd) cursor_resume();
 	return;
 }
 /**
  * @brief 在当前行反复显示（自动回车）
- * 先默认背景色是白色，以后再进行修改
  * @param hwnd 
  * @param s 
  * @param font_color 
  */
 void win_showslr(int hwnd,char* s, unsigned char font_color){
 	g_v_boxfill(sc->sheets[windows[hwnd].sheet_index].buf,windows[hwnd].width,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,my_strlen(s)*8,16,windows[hwnd].bg_color);
-	int length = g_shows(sc->sheets[windows[hwnd].sheet_index].buf,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width,windows[hwnd].ins_width,windows[hwnd].ins_height);
+	int length = g_winshows(windows[hwnd].sheet_index,hwnd,s,windows[hwnd].cursor_x,windows[hwnd].cursor_y,font_color,windows[hwnd].width);
 	sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,length*8,16);
 	return;
 }
@@ -125,8 +125,21 @@ void win_showc(int hwnd,char c,unsigned char font_color){
 	if(c=='\n') {
 		windows[hwnd].cursor_y += 16;
 		windows[hwnd].cursor_x = LS_INTERVAL;
+		if(windows[hwnd].cursor_y+16>=windows[hwnd].ins_height){
+			g_scrollup(windows[hwnd].sheet_index,16,SHADOW_PIX,SHADOW_PIX+WINDOWHEAD_PIX,windows[hwnd].ins_width,windows[hwnd].cursor_y,windows[hwnd].width,windows[hwnd].ins_height,windows[hwnd].bg_color);
+			windows[hwnd].cursor_y-=16;
+		}
 	}
 	else{
+		if(windows[hwnd].cursor_x+16>=windows[hwnd].ins_width){
+			//超过正文内容显示区域，换行
+			windows[hwnd].cursor_x = LS_INTERVAL;
+			windows[hwnd].cursor_y += 16;
+		}
+		if(windows[hwnd].cursor_y+16>=windows[hwnd].ins_height){
+			g_scrollup(windows[hwnd].sheet_index,16,SHADOW_PIX,SHADOW_PIX+WINDOWHEAD_PIX,windows[hwnd].ins_width,windows[hwnd].cursor_y,windows[hwnd].width,windows[hwnd].ins_height,windows[hwnd].bg_color);
+			windows[hwnd].cursor_y-=16;
+		}
 		g_showc(sc->sheets[windows[hwnd].sheet_index].buf,c,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,font_color,windows[hwnd].width);
 		sheet_refresh(windows[hwnd].sheet_index,windows[hwnd].cursor_x+SHADOW_PIX,windows[hwnd].cursor_y+SHADOW_PIX+WINDOWHEAD_PIX,8,16);
 		windows[hwnd].cursor_x+=8;

@@ -127,7 +127,7 @@ void g_v_edgefill(unsigned char*p,int sizex, int x0,int y0,int board,int width,i
 }
 /**
  * @brief 绘制标准窗口，包括标题，按钮，阴影，样式码：1
- * 
+ * 此函数需要窗口调用
  * @param name 窗口标题
  * @param width 宽度（如果超过窗口限制会自动调整满屏）
  * @param height 高度（如果超过窗口限制会自动调整满屏）
@@ -148,7 +148,7 @@ unsigned char* g_windowfill(const char* name,int width,int height,unsigned char 
 	//关闭
 	g_v_boxfill(p,width,width-SHADOW_PIX-22,SHADOW_PIX+3,16,16,1);
 	//窗口名
-	g_shows(p,name,6,-21,(color+7)%14,width,ins_x,ins_y);
+	g_shows(p,name,6,-21,(color+7)%14,width);
 	return p;
 }
 /**
@@ -173,32 +173,102 @@ void g_showc(unsigned char*p, char c, int x0, int y0, char color ,int sizex){
 }
 /**
  * @brief 在某一图层的内容数组buf上的相对位置加上一个字符串，需要手动渲染
- * 
- * @param p 原数组
+ * @note 此函数只有窗口可以调用
+ * @param sheet_index 图层ID
+ * @param hwnd
  * @param string 
  * @param x0 正文内容相对位置x
  * @param y0 正文内容相对位置y
  * @param color 
  * @param sizex 原图层宽度
- * @param ins_x 正文内容可用宽度
- * @param ins_y 正文内容可用高度
  * @return int 字符串长度，不包括\0
  */
-int g_shows(unsigned char*p,const char* string, int x0, int y0, char color,int sizex,int ins_x,int ins_y){
-	
+int g_winshows(int sheet_index,int hwnd,const char* string, int x0, int y0, char color,int sizex){
+	unsigned char* p = sc->sheets[sheet_index].buf;
 	int count = 0;
 	int x = x0;
 	int y = y0;
 	for(;*string;string++,x+=8,count++){
-		if(x+8>ins_x){
+		if(x+16>=windows[hwnd].ins_width){
 			//超过正文内容显示区域，换行
 			x = LS_INTERVAL;
 			y += 16;
+			windows[hwnd].cursor_y+=16;
+			windows[hwnd].cursor_x=LS_INTERVAL;
 		}
 		//todo 如果超过高度限制屏幕上滚
+		if(y+32>=windows[hwnd].ins_height){
+			g_scrollup(sheet_index,16,SHADOW_PIX,SHADOW_PIX+WINDOWHEAD_PIX,windows[hwnd].ins_width,y,sizex,windows[hwnd].ins_height,windows[hwnd].bg_color);
+			windows[hwnd].cursor_y-=16;
+			y-=16;
+		}
 		g_showc(p,*string,x+SHADOW_PIX,y+SHADOW_PIX+WINDOWHEAD_PIX,color,sizex);
 	}
 	return count;
+}
+/**
+ * @brief 
+ * 
+ * @param p 在某一图层的内容数组buf上的相对位置加上一个字符串，需要手动渲染
+ * @note 不关注换行，超出范围等限制，都可调用
+ * @param string 
+ * @param x0 
+ * @param y0 
+ * @param color 
+ * @param sizex 
+ * @param ins_x 
+ * @param ins_y 
+ */
+void g_shows(unsigned char* p,const char* string, int x0, int y0, char color,int sizex){
+	int x = x0;
+	int y = y0;
+	for(;*string;string++,x+=8){
+		g_showc(p,*string,x+SHADOW_PIX,y+SHADOW_PIX+WINDOWHEAD_PIX,color,sizex);
+	}
+}
+/**
+ * @brief 上滚图层，自动刷新
+ * 			
+ * @param sheet_index 图层ID
+ * @param pixes 上滚像素
+ * @param x0 上滚区域左上角坐标x(相对整个图层)
+ * @param y0 上滚区域左上角坐标y(相对整个图层)
+ * @param width 上滚区域宽度
+ * @param height 上滚区域高度
+ * @param sizex 原数组宽度
+ * @param ins_y 总可更新行数，超出这个行数就填充背景色
+ * @param bg_color 空出部分背景填充色
+ */
+void g_scrollup(int sheet_index,int pixes,int x0,int y0,int width,int height,int sizex,int ins_y,unsigned char bg_color){
+	unsigned char* p = sc->sheets[sheet_index].buf;
+	// int max32 = width/4;
+	// int min8 = width-max32*4;
+	//int cc = bg_color<<24+bg_color<<16+bg_color<<8+bg_color;
+	for(int i=0;i<height;i++){
+		unsigned char* temp = p+x0+(y0+i)*sizex;
+		if(i+y0+pixes-WINDOWHEAD_PIX-SHADOW_PIX<ins_y){
+			// for(int j=0;j<max32;j++){
+			// 	*((int*)(temp+j*4)) = *((int*)(temp+j*4+sizex*pixes));
+			// }
+			// for(int j=0;j<min8;j++){
+			// 	*((unsigned char*)(temp+(max32-1)*4)+j) = *((unsigned char*)(temp+(max32-1)*4+j+sizex*pixes));
+			// }
+			for(int j=0;j<width;j++){
+				*((unsigned char*)(temp+j)) = *((unsigned char*)(temp+j+sizex*pixes));
+			}
+		}else{
+			// for(int j=0;j<max32;j++){
+			// 	*((int*)(temp+j*4)) = cc;
+			// }
+			// for(int j=0;j<min8;j++){
+			// 	*((unsigned char*)(temp+(max32-1)*4)+j) = bg_color;
+			// }
+			for(int j=0;j<width;j++){
+				*((unsigned char*)(temp+j)) = bg_color;
+			}
+		}
+	}
+	sheet_refresh(sheet_index,x0,y0,width,height);
 }
 /**
  * @brief 初始化图层控制器

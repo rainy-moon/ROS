@@ -44,5 +44,13 @@ int max(int a1,int a2);
  * @return int 
  */
 int min(int a1,int a2);
-
+/**
+ * @brief 用c字符分割字符串s为多个子串
+ * 			注意：c不能为'\0'
+ * 			开头和结尾若有分割字符则会被分割为空串
+ * @param s 
+ * @param c 
+ * @return char** 
+ */
+unsigned char** splitby(unsigned char* s, char c);
 #endif

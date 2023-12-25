@@ -103,3 +103,16 @@ int min(int a1,int a2){
 	if(a1<a2) return a1;
 	else return a2;
 }
+
+unsigned char** splitby(unsigned char* s,char c){
+	ss[0] = (unsigned char*)1; 
+	ss[1] = s;
+	for(int i = 0;s[i];i++){
+		if(s[i]==c){
+			s[i] = '\0';
+			ss[0] = (unsigned char*)((int)ss[0]+1);
+			ss[(int)ss[0]] = s+i+1;
+		}
+	}
+	return ss;
+}

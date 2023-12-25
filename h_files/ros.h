@@ -51,7 +51,8 @@ void TimerInputAction();
 void MouseInputAction();
 void KeyInputAction();
 //全局量
-unsigned char s[20];
-
+unsigned char s[128];
+unsigned char* ss[32];	//splitby使用，ss[0]表示一共分割成的子串个数
+						//从ss[1]开始指向被分割的多个字符串
 
 #endif

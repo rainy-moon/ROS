@@ -10,7 +10,7 @@ void get_timer_input(){
 		int data = io_buffer_pop(&tm_buffer_ctrl);
 		switch(data){
 			case 34:
-				my_sprintf(s,"5s %d",time_count);
+				my_sprintf(s,"5s %d %d",time_count,windows[2].cursor_y);
 				win_showsln(2,s,COLOR_BLACK);
 				time_count = 0;
 				break;
