@@ -107,7 +107,7 @@ void mousedetector(){
 					//点击
 					w->statu&=0xffffff01;
 					w->statu|=0x00000002;
-					if((w->statu>>8)&0x1){
+					if(((w->statu>>8)&0xff) != 0){
 						cursor_pause();
 						if(w->statu&0x0000ff00) focused_window = w;
 						sheet_updatez(w->sheet_index,sc->top-1);
@@ -132,7 +132,7 @@ void mousedetector(){
 					//拖动
 					w->statu&=0xffffff01;
 					w->statu|=0x00000008;
-					if((w->statu>>8)&0x1){
+					if(((w->statu>>8)&0xff) != 0){
 						cursor_pause();
 						// int eflag = store_eflags();
 						// cli();

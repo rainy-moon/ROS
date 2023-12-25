@@ -62,22 +62,18 @@ void init_TSS(struct TSS* tss);
  */
 int create_task(int funcaddr,int level,int flags);
 /**
- * @brief 注册任务
- * 
+ * @brief 注册任务,搜索是否能分配任务结构体，填写相应结构体描述，返回pid
  * 
  * @param gs 段号
  * @param pid 任务id
  * @param limit 限长
  * @param settings 设置
  * @return 
-
- * @todo 搜索是否能分配任务结构体，填写相应结构体描述，返回pid
  */
 void regtask(int pid,unsigned int limit,unsigned int settings);
 int init_multipc_ctrl();
 /**
- * @brief 进程切换
- * @todo 将pc改成待切换进程，执行任务切换函数
+ * @brief 进程切换,将pc改成待切换进程，执行任务切换函数
  * @param pid 进程pid
  */
 void change_task(int pid);

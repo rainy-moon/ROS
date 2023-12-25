@@ -148,7 +148,7 @@ unsigned char* g_windowfill(const char* name,int width,int height,unsigned char 
 	//关闭
 	g_v_boxfill(p,width,width-SHADOW_PIX-22,SHADOW_PIX+3,16,16,1);
 	//窗口名
-	g_shows(p,name,6,-21,COLOR_BLACK,width,ins_x,ins_y);
+	g_shows(p,name,6,-21,(color+7)%14,width,ins_x,ins_y);
 	return p;
 }
 /**
@@ -342,8 +342,8 @@ void sheet_display(int index,int z){
 	int x1 = sc->sheets[index].x+sc->sheets[index].width;
 	int y1 = sc->sheets[index].y+sc->sheets[index].height;
 	//遍历新加图层范围重新渲染
-	for(int i = sc->sheets[index].y;i<y1&&i<sc->maxy;i++)
-		for(int j=sc->sheets[index].x;j<x1&&j<sc->maxx&&j>=0;j++){
+	for(int i = max(0,sc->sheets[index].y);i<y1&&i<sc->maxy;i++)
+		for(int j=max(sc->sheets[index].x,0);j<x1&&j<sc->maxx;j++){
 			int point = (i-sc->sheets[index].y)*sc->sheets[index].width+(j-sc->sheets[index].x);
 			//如果没有该像素处没有图层或者图层层数<=新加图层 & 不是透明色255
 			if((sc->sheet_zlevel[z]->buf[point]!=COLOR_TRANSP ) && (!screen_buf[i*sc->maxx+j]||screen_buf[i*sc->maxx+j]->z<z)) {
@@ -445,16 +445,14 @@ void sheet_slide(int x,int y,int index){
 	int old_y = sc->sheets[index].y;
 	int x1 = old_x+sc->sheets[index].width;
 	int y1 = old_y+sc->sheets[index].height;
-	int x2 = x+sc->sheets[index].width;
-	int y2 = y+sc->sheets[index].height;
 	//sheet_hide(index);
 	sc->sheets[index].x=x;
 	sc->sheets[index].y=y;
 	sheet_display(index,h);
-	int param[8] = {old_y,y1,old_x,x1,0,0,0,0};
+	int param[4] = {old_y,y1,old_x,x1};
 	
-	for(int i = param[0];i<param[1];i++){
-		for(int j=param[2];j<param[3];j++){
+	for(int i = max(0,param[0]);i<param[1]&&i<sc->maxy;i++){
+		for(int j=max(0,param[2]);j<param[3]&&j<sc->maxx;j++){
 			for(int k = sc->sheets[index].z;k>=0;k--){
 				if(screen_buf[i*sc->maxx+j]!=&(sc->sheets[index])) continue;
 				else{

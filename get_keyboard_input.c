@@ -5,7 +5,7 @@ void get_keyboard_input(){
 		if(data!=-1&&data<0x44&&dictionary[data]){
 			// my_sprintf(s,"kb: %c",dictionary[data]);
 			// win_showsln(1,s,7);
-			win_showc(focused_window->hwnd,dictionary[data],COLOR_BLACK);
+			win_showc(focused_window->hwnd,dictionary[data],(focused_window->bg_color+7)%14);
 		}
 	}
 	else ISleep(&prograsses[4]);

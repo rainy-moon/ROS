@@ -64,6 +64,12 @@ int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned
 				windows[i].height = height+2*SHADOW_PIX+24;
 				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color,windows[i].ins_width,windows[i].ins_height);
 				break;
+			case 2:
+				windows[i].x0-=SHADOW_PIX;
+				windows[i].y0-=(SHADOW_PIX+WINDOWHEAD_PIX);
+				windows[i].width = width+2*SHADOW_PIX;
+				windows[i].height = height+2*SHADOW_PIX+24;
+				buffer = g_windowfill(name,windows[i].width,windows[i].height,bg_color,windows[i].ins_width,windows[i].ins_height);
 		}
 		windows[i].hwnd = i;
 		windows[i].sheet_index = sheet_malloc(windows[i].x0,windows[i].y0,windows[i].width,windows[i].height,z,buffer,i+1);

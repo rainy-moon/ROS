@@ -107,9 +107,6 @@ void init_PIT(){
  */
 void inthandler20h(int* esp){
 	io_out8(PIC0_OCW2,0X60);
-	/**
-	 * @todo 时钟中断处理
-	 */
 	tc.time++;
 	int task = 0;
 	int flag = 0;

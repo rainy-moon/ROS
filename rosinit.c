@@ -53,6 +53,8 @@ void MAIN(){
 	win_create("debug",200,100,500,400,sc->top,COLOR_WHITE,1);
 	// 键盘输入测试窗口
 	win_create("keyin",10,500,500,200, sc->top,COLOR_WHITE,1);
+	// 控制台窗口
+	win_create("Console",300,150,600,500,sc->top,COLOR_BLACK,2);
 	//手动默认初始激活窗口为键盘输入测试
 	focused_window = windows+3;
 	//初始化计时器
