@@ -8,6 +8,6 @@ void get_keyboard_input(){
 			win_showc(focused_window->hwnd,dictionary[data],(focused_window->bg_color+7)%14);
 		}
 	}
-	else ISleep(&prograsses[4]);
+	else ISleep(&prograsses[keyboard_input_pid-1]);
 	return;
 }

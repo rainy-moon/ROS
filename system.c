@@ -124,7 +124,7 @@ void inthandler20h(int* esp){
 		}
 		else break;
 	}
-	if(flag) IAwake(&prograsses[2]);
+	if(flag) IAwake(&prograsses[timer_input_pid-1]);
 	if(task>2){
 		change_task(task-2);
 	}
@@ -138,7 +138,7 @@ void inthandler20h(int* esp){
 void inthandler21h(int* esp){
 	io_out8(PIC0_OCW2,0x61);
 	io_buffer_push(&kb_buffer_ctrl,io_in8(PORT_GETKEY));
-	IAwake(&prograsses[4]);
+	IAwake(&prograsses[keyboard_input_pid-1]);
 	return;
 }
 /**
@@ -150,7 +150,7 @@ void inthandler2ch(int* esp){
 	io_out8(PIC1_OCW2,0x64);
 	io_out8(PIC0_OCW2,0x62);
 	io_buffer_push(&ms_buffer_ctrl,io_in8(PORT_GETKEY));
-	IAwake(&prograsses[3]);
+	IAwake(&prograsses[mouse_input_pid-1]);
 	return;
 }
 /**

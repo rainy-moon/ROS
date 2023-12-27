@@ -47,6 +47,9 @@
 
 //console.c 命令行程序
 #include "console.h"
+
+//debug.c 打印进程、窗口、计时器信息等
+#include "debug.h"
 //系统任务
 void MouseDetector();
 void TimerInputAction();

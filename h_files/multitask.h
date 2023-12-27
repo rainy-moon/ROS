@@ -25,7 +25,7 @@ struct prograss{
 	int statu;
 	int flags;
 	int parent;
-	int pid;
+	int pid; //pid = index+1
 	int level;
 	struct TSS tss;
 	char name[20];

@@ -8,6 +8,7 @@ struct console_command{
 	int point;
 	int statu; //0 未执行 1 正在执行 2 问答模式
 	int hwnd;
+	int pid;//命令行任务pid
 }cc;
 //function define
 void init_console_command();

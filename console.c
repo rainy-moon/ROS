@@ -3,8 +3,8 @@ void init_console_command(){
 	cc.point = 0;
 	cc.statu = 0;
 	cc.hwnd = get_hwnd_by_name("Console");
-	int pid_5 = create_task("console",(int)&ConsoleExec,0,0);
-	if(pid_5) regtask(pid_5,103,AR_TSS32);
+	cc.pid = create_task("console",(int)&ConsoleExec,0,0);
+	if(cc.pid) regtask(cc.pid,103,AR_TSS32);
 }
 void console_inputchar(char c){
 	switch(c){
@@ -12,13 +12,14 @@ void console_inputchar(char c){
 		{
 			command[cc.point]='\0';
 			cc.statu=1;
-			IAwake(&prograsses[5]);
+			IAwake(&prograsses[cc.pid-1]);
 			cc.point=0;
 			break;
 		}
 		case '\b':
 		{
 			cc.point--;		
+			break;
 		}
 		default:
 		{
@@ -62,7 +63,7 @@ void ConsoleExec(){
 				win_showsln(cc.hwnd,s,COLOR_WHITE);
 			}else if(!my_strcmp(ss[1],"hi",2)){
 				//没啥用的好玩命令，检查第二参数
-				if((int)ss[0]<2 ||!my_strcmp(ss[2],"zero",4)){
+				if((int)ss[0]<2 ||my_strcmp(ss[2],"zero",4)){
 					win_showsln(cc.hwnd,">Who are you calling?",COLOR_WHITE);
 				}else{
 					win_showsln(cc.hwnd,">Hi, what can I do?",COLOR_WHITE);
@@ -77,6 +78,6 @@ void ConsoleExec(){
 			}
 		}
 		win_showc(cc.hwnd,'>',COLOR_WHITE);
-		ISleep(&prograsses[5]);
+		ISleep(&prograsses[cc.pid-1]);
 	}
 }

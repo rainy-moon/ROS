@@ -5,6 +5,8 @@
 // global define 
 struct io_buffer ms_buffer_ctrl;
 unsigned char ms_buffer[128];
+int mouse_input_pid;
+int mouse_detector_pid;
 // function define
 int get_mouse_input(int ms_state);
 /**

@@ -5,6 +5,7 @@
 // global define 
 struct io_buffer tm_buffer_ctrl;
 unsigned char tm_buffer[128];
+int timer_input_pid;
 // function define
 void get_timer_input();
 #endif

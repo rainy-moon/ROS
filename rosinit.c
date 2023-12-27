@@ -49,10 +49,6 @@ void MAIN(){
 	mouse_create();
 	//桌面图层
 	win_create("desktop",0,0,sc->maxx,sc->maxy,sc->top,6,0);
-	//调试窗口
-	win_create("debug",200,100,500,400,sc->top,COLOR_WHITE,1);
-	// 键盘输入测试窗口
-	win_create("keyin",10,500,500,200, sc->top,COLOR_WHITE,1);
 	// 控制台窗口
 	win_create("Console",300,150,600,500,sc->top,COLOR_BLACK,2);
 	//手动默认初始激活窗口为键盘输入测试
@@ -66,14 +62,14 @@ void MAIN(){
 	//sem1 = init_sem(1,"sem1");
 	sem_cursor = init_sem(1,"sem_cursor");
 	//
-	int pid_1 = create_task("MDetector",(int)&MouseDetector,0,0);
-	if(pid_1) regtask(pid_1,103,AR_TSS32);
-	int pid_2 = create_task("TIA",(int)&TimerInputAction,0,0);
-	if(pid_2) regtask(pid_2,103,AR_TSS32);
-	int pid_3 = create_task("MIA",(int)&MouseInputAction,0,0);
-	if(pid_3) regtask(pid_3,103,AR_TSS32);
-	int pid_4 = create_task("KIA",(int)&KeyInputAction,0,0);
-	if(pid_4) regtask(pid_4,103,AR_TSS32);
+	mouse_detector_pid = create_task("MDetector",(int)&MouseDetector,0,0);
+	if(mouse_detector_pid) regtask(mouse_detector_pid,103,AR_TSS32);
+	int timer_input_pid = create_task("TIA",(int)&TimerInputAction,0,0);
+	if(timer_input_pid) regtask(timer_input_pid,103,AR_TSS32);
+	int mouse_input_pid = create_task("MIA",(int)&MouseInputAction,0,0);
+	if(mouse_input_pid) regtask(mouse_input_pid,103,AR_TSS32);
+	int keyboard_input_pid = create_task("KIA",(int)&KeyInputAction,0,0);
+	if(keyboard_input_pid) regtask(keyboard_input_pid,103,AR_TSS32);
 	//初始化命令行程序
 	init_console_command();
 	//加入10s计时器,计算性能。
@@ -106,3 +102,4 @@ void MAIN(){
 #include"semaphore.c"
 #include"cursor.c"
 #include"console.c"
+#include"debug.c"

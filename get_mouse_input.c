@@ -29,7 +29,7 @@ int get_mouse_input(int ms_state){
 				}
 				else break;
 			}
-			else{ISleep(&prograsses[3]); break;}
+			else{ISleep(&prograsses[mouse_input_pid-1]); break;}
 		case 1:
 			if(io_buffer_num(&ms_buffer_ctrl)){
 				int data = io_buffer_pop(&ms_buffer_ctrl);
@@ -39,7 +39,7 @@ int get_mouse_input(int ms_state){
 				}
 				else break;
 			}
-			else{ISleep(&prograsses[3]); break;}
+			else{ISleep(&prograsses[mouse_input_pid-1]); break;}
 		case 2:
 			if(io_buffer_num(&ms_buffer_ctrl)){
 				int data = io_buffer_pop(&ms_buffer_ctrl);
@@ -57,7 +57,7 @@ int get_mouse_input(int ms_state){
 					mouse.mouse_state[2]=(unsigned char)data;
 					ms_state = 1;
 					mouse_decode();					
-					IAwake(&prograsses[1]);
+					IAwake(&prograsses[mouse_detector_pid-1]);
 				}
 				else break;
 			}
@@ -161,5 +161,5 @@ void mousedetector(){
 	}
 	my_sprintf(s,"mouse %d %d %d",mouse.btn,mouse.hwndp1-1,(windows[mouse.hwndp1-1].statu&0xff)>>1);
 	win_showslr(1,s,COLOR_BLACK);
-	ISleep(&prograsses[1]);
+	ISleep(&prograsses[mouse_detector_pid-1]);
 }
