@@ -51,8 +51,11 @@ void MAIN(){
 	win_create("desktop",0,0,sc->maxx,sc->maxy,sc->top,6,0);
 	// 控制台窗口
 	win_create("Console",300,150,600,500,sc->top,COLOR_BLACK,2);
-	//手动默认初始激活窗口为键盘输入测试
-	focused_window = windows+3;
+	//测试用
+	win_create("prograsses",200,100,500,400,sc->top,COLOR_WHITE,1);
+	win_create("test",100,500,300,200,sc->top,COLOR_WHITE,1);
+	//手动默认初始激活窗口为控制台
+	focused_window = windows+get_hwnd_by_name("Console");
 	//初始化计时器
 	init_timerctrl();
 	//初始化多任务控制器
@@ -64,15 +67,17 @@ void MAIN(){
 	//
 	mouse_detector_pid = create_task("MDetector",(int)&MouseDetector,0,0);
 	if(mouse_detector_pid) regtask(mouse_detector_pid,103,AR_TSS32);
-	int timer_input_pid = create_task("TIA",(int)&TimerInputAction,0,0);
+	timer_input_pid = create_task("TIA",(int)&TimerInputAction,0,0);
 	if(timer_input_pid) regtask(timer_input_pid,103,AR_TSS32);
-	int mouse_input_pid = create_task("MIA",(int)&MouseInputAction,0,0);
+	mouse_input_pid = create_task("MIA",(int)&MouseInputAction,0,0);
 	if(mouse_input_pid) regtask(mouse_input_pid,103,AR_TSS32);
-	int keyboard_input_pid = create_task("KIA",(int)&KeyInputAction,0,0);
+	keyboard_input_pid = create_task("KIA",(int)&KeyInputAction,0,0);
 	if(keyboard_input_pid) regtask(keyboard_input_pid,103,AR_TSS32);
 	//初始化命令行程序
 	init_console_command();
-	//加入10s计时器,计算性能。
+	my_sprintf(s,"%d %d",(int)&prograsses[4],(int)&prograsses[keyboard_input_pid-1]);
+	win_showsln(4,s,COLOR_BLACK);
+	//加入5s计时器,计算性能。
 	timer_malloc(500,0,34);
 	//1s计时器，控制光标闪烁
 	cursor_tid = timer_malloc(50,0,2);

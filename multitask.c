@@ -63,11 +63,15 @@ void change_task(int pid){
 	//重置20ms切换计时器?
 	//将当前进程转换成
 	multipc_ctrl.pc = &prograsses[pid-1];
+	prograsses[pid-1].statu = RUNNING;
 	taskchange(0,(pid+2)<<3);
 	return;
 }
 
 void PSleep(struct prograss* p){
+	int eflags = store_eflags();
+	cli();
+	p->statu=PD;
 	if(p==multipc_ctrl.pc){
 		//如果休眠当前进程则要进行切换
 		simlist_sortedinsert(&(multipc_ctrl.pd),(struct node*)(prograsses+p->pid-1),4); 
@@ -83,23 +87,28 @@ void PSleep(struct prograss* p){
 			simlist_sortedinsert(&(multipc_ctrl.pd),(struct node*)(prograsses+p->pid-1),4);
 		}
 	}
+	load_eflags(eflags);
 	return;
 }
 
 void PAwake(struct prograss* p){
+	int eflags = store_eflags();
+	cli();
 	int index = simlist_find(&(multipc_ctrl.pd),p->pid,3);
 	if(index==-1);
 	else{
 		simlist_delete(&(multipc_ctrl.pd),index);
+		p->statu = RUNABLE;
 		simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)(prograsses+p->pid-1),4);
 	}
+	load_eflags(eflags);
 	return;
 }
 
 void ISleep(struct prograss* p){
-	// int eflags = store_eflags();
-	// cli();
-	
+	int eflags = store_eflags();
+	cli();
+	p->statu=PS;
 	if(p==multipc_ctrl.pc){
 		
 		//如果休眠当前进程则要进行切换
@@ -116,7 +125,7 @@ void ISleep(struct prograss* p){
 			simlist_sortedinsert(&(multipc_ctrl.ps),(struct node*)(prograsses+p->pid-1),4);
 		}
 	}
-	//load_eflags(eflags);
+	load_eflags(eflags);
 	return;
 }
 
@@ -127,6 +136,7 @@ void IAwake(struct prograss* p){
 	if(index==-1);
 	else{
 		simlist_delete(&(multipc_ctrl.ps),index);
+		p->statu=PR;
 		simlist_sortedinsert(&(multipc_ctrl.pr),(struct node*)(prograsses+p->pid-1),4);
 	}
 	load_eflags(eflags);

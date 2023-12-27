@@ -8,8 +8,8 @@ int init_timerctrl(){
 	init_simlist(&(tc.timelist));
 	struct timer* guard = mem_malloc(sizeof(struct timer));
 	if(!guard) return 0;
-	guard->time = 0xffff;
-	guard->timeout = 0xffff;
+	guard->time = 0x7fffffff;
+	guard->timeout = 0x7fffffff;
 	guard->flags = 0;
 	guard->tid = 0x0;
 	guard->data = 0xff;

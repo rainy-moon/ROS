@@ -138,6 +138,8 @@ void inthandler20h(int* esp){
 void inthandler21h(int* esp){
 	io_out8(PIC0_OCW2,0x61);
 	io_buffer_push(&kb_buffer_ctrl,io_in8(PORT_GETKEY));
+	// my_sprintf(s,"%d %d %d",(int)&prograsses[4],(int)&prograsses[keyboard_input_pid-1],keyboard_input_pid);
+	// win_showsln(4,s,COLOR_BLACK);
 	IAwake(&prograsses[keyboard_input_pid-1]);
 	return;
 }

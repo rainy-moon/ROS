@@ -44,11 +44,7 @@ void ConsoleExec(){
 				cc.point = 0;
 			}else if(!my_strcmp(ss[1],"open",cc.hwnd)){
 				//打开一个新默认普通窗口（类型为1，（200,100）500*400），后跟一个参数作为窗口名
-				if((int)ss[0]<2 ||my_strlen(ss[2])>20 
-				||!my_strcmp(ss[2],"debug",5) 
-				||!my_strcmp(ss[2],"console",7) 
-				||!my_strcmp(ss[2],"desktop",7)
-				){
+				if((int)ss[0]<2 ||my_strlen(ss[2])>20 ||get_hwnd_by_name(ss[2])!=-1){
 					win_showsln(cc.hwnd,">Forbidden name",COLOR_WHITE);
 				}
 				else{

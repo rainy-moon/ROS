@@ -10,6 +10,8 @@
 #define PR				2
 #define NEWC			3
 #define PN				3
+#define PD				4
+#define PS 				5
 //struct define
 struct TSS{
 	int backlink;

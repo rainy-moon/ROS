@@ -21,7 +21,7 @@ void get_timer_input(){
 				if(debug!=-1){
 					show_windows(debug);
 				}
-				debug = get_hwnd_by_name("processes");
+				debug = get_hwnd_by_name("prograsses");
 				if(debug!=-1){
 					show_prograsses(debug);
 				}

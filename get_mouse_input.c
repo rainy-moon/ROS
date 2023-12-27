@@ -29,7 +29,8 @@ int get_mouse_input(int ms_state){
 				}
 				else break;
 			}
-			else{ISleep(&prograsses[mouse_input_pid-1]); break;}
+			//else{ISleep(&prograsses[3]); break;}
+			else{ISleep(&(prograsses[mouse_input_pid-1])); break;}
 		case 1:
 			if(io_buffer_num(&ms_buffer_ctrl)){
 				int data = io_buffer_pop(&ms_buffer_ctrl);
@@ -39,7 +40,7 @@ int get_mouse_input(int ms_state){
 				}
 				else break;
 			}
-			else{ISleep(&prograsses[mouse_input_pid-1]); break;}
+			else{ISleep(&(prograsses[mouse_input_pid-1])); break;}
 		case 2:
 			if(io_buffer_num(&ms_buffer_ctrl)){
 				int data = io_buffer_pop(&ms_buffer_ctrl);
@@ -49,7 +50,7 @@ int get_mouse_input(int ms_state){
 				}
 				else break;
 			}
-			//else {ISleep(&prograsses[3]); break;}
+			//else {ISleep(&prograsses[mouse_input_pid-1]); break;}
 		case 3:
 			if(io_buffer_num(&ms_buffer_ctrl)){
 				int data = io_buffer_pop(&ms_buffer_ctrl);
@@ -61,7 +62,7 @@ int get_mouse_input(int ms_state){
 				}
 				else break;
 			}
-			//else {ISleep(&prograsses[3]); break;}
+			//else {ISleep(&prograsses[mouse_input_pid-1]); break;}
 	}
 	return ms_state;	
 }
