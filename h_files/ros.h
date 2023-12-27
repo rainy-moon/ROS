@@ -45,6 +45,8 @@
 //cursor.c 光标显示相关函数
 #include "cursor.h"
 
+//console.c 命令行程序
+#include "console.h"
 //系统任务
 void MouseDetector();
 void TimerInputAction();

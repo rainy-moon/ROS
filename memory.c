@@ -1,6 +1,7 @@
 #include"ros.h"
 int mem_scanner = 0;
 int memcheck(int addrs,int addre){
+	
 	for(int i=addrs;i<=addre;i+=0x2000){
 		int test0 = 0xaa55aa55,test1 = 0x55aa55aa;
 		int *p = (int*)(i+0x1ffc);
@@ -18,6 +19,7 @@ int memcheck(int addrs,int addre){
 				return (i-addrs)/1024;
 			}
 		}
+		*p = temp;
 	}
 	return (addre-addrs)/1024;
 }

@@ -114,6 +114,16 @@ void mousedetector(){
 						cursor_resume();
 					}
 					//todo 点击区域事件检查
+					if((w->statu>>8)&0xff !=2 
+					&& between(w->mouse_x,w->width-SHADOW_PIX-22,w->width-SHADOW_PIX-6) 
+					&& between(w->mouse_y,SHADOW_PIX+3,SHADOW_PIX+19)){
+						int f=0;
+						if(focused_window==w) {cursor_pause();f=1;}
+						win_free(w->hwnd);
+						focused_window = &windows[get_hwnd_by_name("Console")];
+						if(f) cursor_resume();
+						mouse.hwndp1 = 0;
+					}
 				}else if(statu==4){
 					//松开拖动
 					w->statu&=0xffffff01;

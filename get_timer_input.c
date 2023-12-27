@@ -10,10 +10,14 @@ void get_timer_input(){
 		int data = io_buffer_pop(&tm_buffer_ctrl);
 		switch(data){
 			case 34:
-				my_sprintf(s,"5s %d %d",time_count,windows[2].cursor_y);
+			{
+				char test[20];
+				my_strcpy(test,"mouse",20); 
+				my_sprintf(s,"5s %d %d %s",time_count,windows[2].cursor_y,test);
 				win_showsln(2,s,COLOR_BLACK);
 				time_count = 0;
 				break;
+			}
 			case 2:
 				cursor_update();
 				break;

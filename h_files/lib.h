@@ -53,4 +53,21 @@ int min(int a1,int a2);
  * @return char** 
  */
 unsigned char** splitby(unsigned char* s, char c);
+/**
+ * @brief 字符串深拷贝
+ * 
+ * @param s 拷贝目标串
+ * @param ss 被拷贝串
+ * @param length 截断长度，被拷贝串超出这个长度会被截断,保留长度为length-1
+ */
+void my_strcpy(char* s,const char* ss,int length);
+/**
+ * @brief tar是否在两数之间（包含两数）
+ * 
+ * @param tar 
+ * @param a1 
+ * @param a2 
+ * @return int 在两数之间返回1，否则返回0
+ */
+int between(int tar,int a1,int a2);
 #endif

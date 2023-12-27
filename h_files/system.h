@@ -49,4 +49,5 @@ void init_PIT();
 void wait_kbc_ready();
 void init_keyboard();
 void enable_mouse();
+void debug();
 #endif

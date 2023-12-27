@@ -96,9 +96,13 @@ void init_PIT(){
 	io_out8(0x40,0x2e);
 	return;
 }
-
-
-
+/**
+ * @brief 向debug窗口输出进程信息和计时器信息
+ * 
+ */
+void debug(){
+	
+}
 
 /**
  * @brief 时钟中断程序

@@ -9,6 +9,7 @@
 // struct define
 struct window
 {
+	//todo 未来窗口要能注册点击区域事件
 	//窗体名字不超过19字符
 	char name[20];
 	int hwnd;
@@ -53,8 +54,10 @@ struct window* focused_window;
 
 // function define
 int mouse_create();
+int get_hwnd_by_name(const char* s);
 int win_create(char* name, int x0, int y0, int width, int height,int z, unsigned char bg_color, int style);
 void win_showsln(int hwnd, char* s, unsigned char font_color);
 void win_showslr(int hwnd, char* s, unsigned char font_color);
 void win_showc(int hwnd,char c,unsigned char font_color);
+void win_free(int hwnd);
 #endif

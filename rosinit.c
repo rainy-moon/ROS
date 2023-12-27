@@ -48,7 +48,7 @@ void MAIN(){
 	mouse.posx = 160;mouse.posy=100;
 	mouse_create();
 	//桌面图层
-	win_create("ROS_desktop",0,0,sc->maxx,sc->maxy,sc->top,6,0);
+	win_create("desktop",0,0,sc->maxx,sc->maxy,sc->top,6,0);
 	//调试窗口
 	win_create("debug",200,100,500,400,sc->top,COLOR_WHITE,1);
 	// 键盘输入测试窗口
@@ -66,16 +66,16 @@ void MAIN(){
 	//sem1 = init_sem(1,"sem1");
 	sem_cursor = init_sem(1,"sem_cursor");
 	//
-	int pid_1 = create_task((int)&MouseDetector,0,0);
+	int pid_1 = create_task("MDetector",(int)&MouseDetector,0,0);
 	if(pid_1) regtask(pid_1,103,AR_TSS32);
-	int pid_2 = create_task((int)&TimerInputAction,0,0);
+	int pid_2 = create_task("TIA",(int)&TimerInputAction,0,0);
 	if(pid_2) regtask(pid_2,103,AR_TSS32);
-	int pid_3 = create_task((int)&MouseInputAction,0,0);
+	int pid_3 = create_task("MIA",(int)&MouseInputAction,0,0);
 	if(pid_3) regtask(pid_3,103,AR_TSS32);
-	int pid_4 = create_task((int)&KeyInputAction,0,0);
+	int pid_4 = create_task("KIA",(int)&KeyInputAction,0,0);
 	if(pid_4) regtask(pid_4,103,AR_TSS32);
-	// my_sprintf(s,"p %d %d %d %d",pid_1,pid_2,pid_3,pid_4);
-	// win_showsln(2,s,COLOR_BLACK);
+	//初始化命令行程序
+	init_console_command();
 	//加入10s计时器,计算性能。
 	timer_malloc(500,0,34);
 	//1s计时器，控制光标闪烁
@@ -105,3 +105,4 @@ void MAIN(){
 #include"get_timer_input.c"
 #include"semaphore.c"
 #include"cursor.c"
+#include"console.c"

@@ -28,7 +28,8 @@ struct prograss{
 	int pid;
 	int level;
 	struct TSS tss;
-	int reserve[225];
+	char name[20];
+	int reserve[220];
 }prograsses[MAX_PROCESS];
 struct prograss_ctrl{
 	int stt_tid;			//switch task timer tid
@@ -51,7 +52,7 @@ struct prograss_ctrl{
 void init_TSS(struct TSS* tss);
 /**
  * @brief 创建任务
- * 
+ * @param name 任务名
  * @param funcaddr 函数地址
  * @param level 优先级
  * @param flags 标志
@@ -60,7 +61,7 @@ void init_TSS(struct TSS* tss);
  * @note 目前默认数据段及其他初代码段1<<3 地址0x0
  * @note 自动分配16k栈空间
  */
-int create_task(int funcaddr,int level,int flags);
+int create_task(char* name,int funcaddr,int level,int flags);
 /**
  * @brief 注册任务,搜索是否能分配任务结构体，填写相应结构体描述，返回pid
  * 

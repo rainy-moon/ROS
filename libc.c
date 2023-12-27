@@ -87,7 +87,7 @@ int my_strlen(const char* s){
 int my_strcmp(const char* s1,const char* s2,int length){
 	int i = 0;
 	for(i = 0;i<length;i++){
-		if(s1[i]!=s2[2]) return i+1;
+		if(s1[i]!=s2[i]) return i+1;
 		else if (!s1[i]) return 0;
 		else continue;
 	}
@@ -115,4 +115,19 @@ unsigned char** splitby(unsigned char* s,char c){
 		}
 	}
 	return ss;
+}
+
+void my_strcpy(char* s,const char* ss,int length){
+	int i = 0;
+	for(i=0;i<length&&ss[i];i++){
+		s[i] = ss[i];
+	}
+	if(i==length) s[i-1] = '\0';
+	else s[i] = '\0';
+}
+
+int between(int tar,int a1,int a2){
+	if(a1<a2 && tar>=a1 && tar<=a2) return 1;
+	else if(a1>=a2 && tar<=a1 && tar>=a2) return 1;
+	else return 0;
 }

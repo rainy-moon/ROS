@@ -1,5 +1,6 @@
 #include "ros.h"
 int init_multipc_ctrl(){
+	my_strcpy(prograsses[0].name,"daemon",20);
 	prograsses[0].pid = 1;
 	prograsses[0].tss.iomap=0x40000000;
 	prograsses[0].tss.ldtr=0;
@@ -24,7 +25,7 @@ void init_TSS(struct TSS* tss){
 	return;
 }
 
-int create_task(int funcaddr,int level,int flags){
+int create_task(char* name,int funcaddr,int level,int flags){
 	int i=0;
 	for(;i<MAX_PROCESS;i++)
 		if(prograsses[i].pid==0) break;
@@ -41,6 +42,7 @@ int create_task(int funcaddr,int level,int flags){
 	base->gs = 1<<3;
 	base->eip = funcaddr-0x101000;
 	base->eflags=0x00000202;
+	my_strcpy(prograsses[i].name,name,20);
 	prograsses[i].parent = multipc_ctrl.pc->pid;
 	prograsses[i].level = level;
 	prograsses[i].flags = flags;
