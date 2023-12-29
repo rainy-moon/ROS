@@ -52,8 +52,8 @@ void MAIN(){
 	// 控制台窗口
 	win_create("Console",300,150,600,500,sc->top,COLOR_BLACK,2);
 	//测试用
-	win_create("prograsses",200,100,500,400,sc->top,COLOR_WHITE,1);
-	win_create("test",100,500,300,200,sc->top,COLOR_WHITE,1);
+	//win_create("prograsses",200,100,500,400,sc->top,COLOR_WHITE,1);
+	//win_create("test",100,500,300,200,sc->top,COLOR_WHITE,1);
 	//手动默认初始激活窗口为控制台
 	focused_window = windows+get_hwnd_by_name("Console");
 	//初始化计时器
@@ -75,8 +75,8 @@ void MAIN(){
 	if(keyboard_input_pid) regtask(keyboard_input_pid,103,AR_TSS32);
 	//初始化命令行程序
 	init_console_command();
-	my_sprintf(s,"%d %d",(int)&prograsses[4],(int)&prograsses[keyboard_input_pid-1]);
-	win_showsln(4,s,COLOR_BLACK);
+	// my_sprintf(s,"%d %d",(int)&prograsses[4],(int)&prograsses[keyboard_input_pid-1]);
+	// win_showsln(4,s,COLOR_BLACK);
 	//加入5s计时器,计算性能。
 	timer_malloc(500,0,34);
 	//1s计时器，控制光标闪烁

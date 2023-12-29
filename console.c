@@ -11,7 +11,7 @@ void console_inputchar(char c){
 		case '\n':
 		{
 			command[cc.point]='\0';
-			cc.statu=1;
+			if(!cc.statu) cc.statu=1;
 			IAwake(&prograsses[cc.pid-1]);
 			cc.point=0;
 			break;

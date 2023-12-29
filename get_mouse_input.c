@@ -147,6 +147,8 @@ void mousedetector(){
 						cursor_pause();
 						// int eflag = store_eflags();
 						// cli();
+						if(w->statu&0x0000ff00) focused_window = w;
+						sheet_updatez(w->sheet_index,sc->top-1);
 						w->x0+=mouse.posx-w->x0-w->mouse_x;
 						w->y0+=mouse.posy-w->y0-w->mouse_y;
 						sheet_slide(w->x0,w->y0,w->sheet_index);
